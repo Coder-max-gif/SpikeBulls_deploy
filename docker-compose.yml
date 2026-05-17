@@ -1,0 +1,79 @@
+version: "3.9"
+
+# --- SpikeBulls local development stack ---
+#
+# Default usage (recommended): run just MongoDB in Docker, run backend + frontend
+# on your machine with their hot-reload dev servers.
+#
+#   docker compose up -d mongo
+#   ./scripts/dev-backend.sh   # in one terminal
+#   ./scripts/dev-frontend.sh  # in another terminal
+#
+# To run the entire stack in Docker (no local Python/Node needed):
+#
+#   docker compose --profile full up --build
+#
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: spikebulls-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - spikebulls_mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ping:1}).ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    profiles: ["full"]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: spikebulls-backend
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      MONGO_URL: "mongodb://mongo:27017"
+      DB_NAME: "spikebulls"
+      APP_URL: "http://localhost:3000"
+      CORS_ORIGINS: "http://localhost:3000"
+      JWT_SECRET: "docker-dev-secret-change-me"
+      ADMIN_EMAIL: "admin@spikebulls.com"
+      ADMIN_PASSWORD: ""
+      ENABLE_STRIPE: "false"
+      EMAIL_PROVIDER: "console"
+      EMAIL_FROM: "SpikeBulls <hello@spikebulls.com>"
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    profiles: ["full"]
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: spikebulls-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      REACT_APP_BACKEND_URL: "http://localhost:8001"
+      HOST: "0.0.0.0"
+      PORT: "3000"
+      BROWSER: "none"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+volumes:
+  spikebulls_mongo_data:

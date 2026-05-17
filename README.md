@@ -1,101 +1,129 @@
-# SpikeBulls — Premium Forex Trading Platform
+# SpikeBulls — Local Development Guide
 
-Full-stack production-ready web app for selling MT5 indicators, algo strategies, forex signals, and trading automation tools.
+Premium forex trading platform: MT5 indicators, algo strategies, forex signals, and automation tools.
 
-**Stack:** React 19 + Tailwind + Framer Motion · FastAPI + Motor · MongoDB · JWT auth · Stripe (gated) · Resend / SMTP / console email.
+**Stack:** React 19 + Tailwind + Framer Motion · FastAPI + Motor · MongoDB · JWT auth · Stripe (gated) · Email (console / SMTP / Resend).
 
----
-
-## ✨ What's Included
-
-- **Public site** — Home, Products catalog, Product detail, Pricing, FAQ, Contact (premium dark fintech UI)
-- **Auth** — Register / login / forgot / reset / verify-email (JWT access + refresh, bcrypt)
-- **Customer dashboard** — orders, licenses, account settings
-- **Admin dashboard** — products CRUD, orders, users, leads, licenses (revoke/regenerate), testimonials
-- **Checkout** — Stripe Checkout when `ENABLE_STRIPE=true`, otherwise a simulated flow that grants licenses + sends email locally
-- **Email** — console (default with `dev_outbox` Mongo collection) / SMTP / Resend
-- **Seeded data** — admin user + 6 products + 4 testimonials on first boot
+This document covers everything you need to run, modify, and extend the project on your own machine.
 
 ---
 
-## 🗂 Project Structure
+## 📦 What's Included
 
 ```
 /app
-├── backend/
-│   ├── server.py                  # FastAPI entrypoint
-│   ├── .env                       # secrets + feature flags
-│   ├── core/{config,database,security,deps,email}.py
-│   ├── models/{user,product,order,license,contact}.py
-│   ├── routes/{auth,products,contact,checkout,user,admin}.py
-│   └── services/{seed,stripe_service}.py
-└── frontend/src/
-    ├── App.js                     # all routes
-    ├── mock.js                    # static marketing copy
-    ├── lib/{api,queries}.js
-    ├── context/AuthContext.jsx
-    ├── components/                # Hero, Navbar, Footer, ProductsOverview, etc.
-    └── pages/
-        ├── public                 # HomePage, ProductsPage, ProductDetailPage, ...
-        ├── auth                   # LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage
-        ├── DashboardPage.jsx, CheckoutSuccessPage.jsx, CheckoutCancelPage.jsx
-        └── admin/                 # AdminLayout + 7 admin sub-pages
+├── backend/                FastAPI + MongoDB
+│   ├── server.py           entrypoint (mounts routers, auto-seeds on first boot)
+│   ├── seed_cli.py         standalone seed CLI (re-runnable, supports --reset and --wipe-all)
+│   ├── .env.example        template — copy to .env
+│   ├── Dockerfile          optional containerization
+│   ├── core/               config / db / security / deps / email
+│   ├── models/             pydantic models (user, product, order, license, contact)
+│   ├── routes/             auth, products, contact, checkout, user, admin
+│   └── services/           seed data + thin Stripe wrapper
+│
+├── frontend/               React 19 (Create React App + craco)
+│   ├── src/                full source
+│   ├── .env.example        template — copy to .env
+│   └── Dockerfile          optional containerization
+│
+├── scripts/
+│   ├── dev-db.sh           start MongoDB in Docker
+│   ├── dev-backend.sh      start FastAPI (creates venv, installs deps, runs uvicorn)
+│   ├── dev-frontend.sh     start CRA dev server (yarn install + yarn start)
+│   └── seed.sh             wrapper around backend/seed_cli.py
+│
+├── docker-compose.yml      MongoDB by default; full stack via --profile full
+├── Makefile                shortcuts (make backend, make frontend, make db, make seed, ...)
+├── .gitignore
+└── README.md               (this file)
 ```
 
 ---
 
-## 🚀 Local Development
+## 🚀 Quick Start (3 terminals, no Docker required)
 
-### Prereqs
-- Node 18+ and **yarn** (do not use npm)
-- Python 3.11+
-- MongoDB running locally (or Atlas)
-
-### Backend
+> Prereqs: **Python 3.11+**, **Node 18+**, **yarn**, and either a local **MongoDB** install or Docker.
 
 ```bash
-cd backend
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn server:app --reload --host 0.0.0.0 --port 8001
+# 1) Start MongoDB
+#    Option A — Docker (recommended):
+docker compose up -d mongo
+#    Option B — system MongoDB:
+#    mongod  # in its own terminal
+
+# 2) Start the backend (in its own terminal)
+./scripts/dev-backend.sh
+# → creates backend/.venv, installs requirements, copies .env.example -> .env on first run,
+#   runs uvicorn on http://0.0.0.0:8001 with hot reload
+#   On first boot it auto-seeds the DB and prints an admin password — save it!
+
+# 3) Start the frontend (in another terminal)
+./scripts/dev-frontend.sh
+# → yarn install, copies frontend/.env.example -> frontend/.env, then runs CRA on
+#   http://localhost:3000
+
+# 4) Open http://localhost:3000
 ```
 
-On first boot the logs print:
-
-```
-[SEED] Admin user created — email=admin@spikebulls.com password=XXXXXXXXX (change after first login)
-[SEED] Products ensured (6 total in catalog).
-[SEED] Testimonials seeded.
-```
-
-Save that admin password. You can also set `ADMIN_PASSWORD` in `.env` to pick your own.
-
-### Frontend
+### One-liner alternatives (using the Makefile)
 
 ```bash
-cd frontend
-yarn install
-yarn start
+make install        # backend + frontend deps in one go
+make db             # start Mongo in Docker
+make backend        # run FastAPI
+make frontend       # run React
+make seed           # re-run idempotent seed
+make reset-seed     # wipe catalog + testimonials, then reseed
+make stack          # full stack via docker compose
 ```
-
-App: <http://localhost:3000> · API: <http://localhost:8001/api/>
 
 ---
 
-## 🔑 Environment Variables (`backend/.env`)
+## 🐳 Full Docker Compose (optional)
+
+If you'd rather skip installing Python/Node locally:
+
+```bash
+docker compose --profile full up --build
+```
+
+Services:
+- **mongo** → `localhost:27017`
+- **backend** → `localhost:8001`
+- **frontend** → `localhost:3000`
+
+Both backend and frontend mount their source directories, so editing files on the host triggers hot reload inside the containers.
+
+Stop everything:
+```bash
+docker compose --profile full down
+```
+
+Wipe data:
+```bash
+docker compose --profile full down -v
+```
+
+---
+
+## ⚙️ Environment Variables
+
+### `backend/.env` — copy from `backend/.env.example`
 
 | Variable | Default | Notes |
 |---|---|---|
 | `MONGO_URL` | `mongodb://localhost:27017` | Required |
-| `DB_NAME` | `test_database` | Required |
-| `JWT_SECRET` | placeholder | **Change in production** (`openssl rand -hex 32`) |
+| `DB_NAME` | `spikebulls` | Required |
+| `CORS_ORIGINS` | `http://localhost:3000` | Comma-separated or `*` for dev |
+| `JWT_SECRET` | placeholder | **Change before sharing** — `openssl rand -hex 32` |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | `60` | |
 | `REFRESH_TOKEN_EXPIRE_DAYS` | `30` | |
-| `APP_URL` | `http://localhost:3000` | Used in email links |
+| `APP_URL` | `http://localhost:3000` | Used in outgoing email links |
 | `ADMIN_EMAIL` | `admin@spikebulls.com` | Seeded on first boot |
-| `ADMIN_PASSWORD` | random | Set to skip the random one |
-| `ENABLE_STRIPE` | `false` | `true` switches to live Stripe Checkout |
-| `STRIPE_SECRET_KEY` | `""` | `sk_test_...` / `sk_live_...` |
+| `ADMIN_PASSWORD` | random | Set this to a known value to skip the random one |
+| `ENABLE_STRIPE` | `false` | `true` → real Stripe Checkout |
+| `STRIPE_SECRET_KEY` | `""` | `sk_test_...` |
 | `STRIPE_WEBHOOK_SECRET` | `""` | `whsec_...` |
 | `STRIPE_SUCCESS_URL` / `STRIPE_CANCEL_URL` | localhost | |
 | `EMAIL_PROVIDER` | `console` | `console` / `smtp` / `resend` |
@@ -103,9 +131,52 @@ App: <http://localhost:3000> · API: <http://localhost:8001/api/>
 | `SMTP_HOST/PORT/USER/PASS` | – | Only if `EMAIL_PROVIDER=smtp` |
 | `RESEND_API_KEY` | – | Only if `EMAIL_PROVIDER=resend` |
 
+### `frontend/.env` — copy from `frontend/.env.example`
+
+| Variable | Default |
+|---|---|
+| `REACT_APP_BACKEND_URL` | `http://localhost:8001` |
+| `HOST` | `0.0.0.0` |
+| `PORT` | `3000` |
+| `BROWSER` | `none` |
+
 ---
 
-## 💳 Enabling Live Stripe Checkout
+## 🌱 Database Setup & Seed
+
+The backend **auto-seeds** on first boot when collections are empty:
+- 1 admin user (`ADMIN_EMAIL` / `ADMIN_PASSWORD` — random if not set)
+- 6 products (MT5 Indicator Pro, Algo Strategy, Forex Signals Pro, Automation Suite, Complete Bundle, Gold Sniper)
+- 4 testimonials
+
+Indexes (`users.email`, `products.slug`, `licenses.key`, `orders.id`) are also created on startup.
+
+### Manual reseeding
+
+```bash
+make seed          # idempotent — only fills what's missing
+make reset-seed    # drops products + testimonials + email_outbox, then reseeds
+
+# Or invoke the CLI directly:
+cd backend
+source .venv/bin/activate
+python -m seed_cli            # idempotent
+python -m seed_cli --reset    # reset catalog + testimonials
+python -m seed_cli --wipe-all # DESTRUCTIVE: drops users/orders/licenses/leads too
+```
+
+### Inspect the DB
+
+```bash
+docker exec -it spikebulls-mongo mongosh spikebulls
+> show collections
+> db.products.find().pretty()
+> db.email_outbox.find().sort({created_at:-1}).limit(5)
+```
+
+---
+
+## 💳 Enabling Live Stripe Checkout (optional)
 
 1. Get test keys from <https://dashboard.stripe.com/test/apikeys>
 2. In `backend/.env`:
@@ -114,48 +185,56 @@ App: <http://localhost:3000> · API: <http://localhost:8001/api/>
    STRIPE_SECRET_KEY=sk_test_xxx
    STRIPE_WEBHOOK_SECRET=whsec_xxx
    ```
-3. Restart backend
-4. Local webhook: `stripe listen --forward-to localhost:8001/api/checkout/webhook`
+3. Restart the backend.
+4. For local webhook testing:
+   ```bash
+   stripe listen --forward-to localhost:8001/api/checkout/webhook
+   ```
 
-The frontend code already calls `/api/checkout` — clicking **Buy now** redirects to Stripe automatically once the flag is on. The webhook marks orders paid, issues licenses, and triggers the purchase email.
+The frontend code doesn't change — clicking **Buy now** redirects to the real Stripe Checkout, and the webhook marks orders paid + issues licenses + sends the purchase email.
+
+Until you flip the flag, checkout runs in **simulated mode**: orders are created locally, licenses are issued instantly, and the purchase email is logged to `email_outbox`.
 
 ---
 
-## 📨 Enabling Real Emails
+## 📨 Enabling Real Emails (optional)
 
-**Resend (recommended):**
+### Resend (simplest)
 ```
 EMAIL_PROVIDER=resend
 RESEND_API_KEY=re_xxx
 EMAIL_FROM=SpikeBulls <hello@yourdomain.com>
 ```
 
-**SMTP (Gmail App Password, Mailgun, etc.):**
+### SMTP (Gmail App Password, Mailgun, SES, etc.)
 ```
 EMAIL_PROVIDER=smtp
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=you@gmail.com
 SMTP_PASS=your-app-password
+EMAIL_FROM=SpikeBulls <you@gmail.com>
 ```
 
-All sends are also written to the `email_outbox` MongoDB collection for audit.
+Every send is **also** written to the `email_outbox` MongoDB collection for audit.
 
 ---
 
-## 🧪 API Quick Reference (all `/api`-prefixed)
+## 🧪 API Reference (all routes prefixed with `/api`)
 
 | Method | Path | Auth | Purpose |
 |---|---|---|---|
 | `GET` | `/` | – | Health + feature flags |
-| `GET` | `/products` | – | List active products (`?category=...`) |
+| `GET` | `/products` | – | List active products (`?category=indicator|algo|signals|automation`) |
 | `GET` | `/products/{slug}` | – | Product detail |
 | `GET` | `/testimonials` | – | Public testimonials |
 | `POST` | `/auth/register` | – | Returns access + refresh tokens |
 | `POST` | `/auth/login` | – | Returns tokens |
 | `POST` | `/auth/refresh` | – | Rotate tokens |
-| `GET/PATCH` | `/auth/me` | user | Profile |
-| `POST` | `/auth/forgot-password` / `/auth/reset-password` / `/auth/verify-email` | – | Password & email |
+| `GET/PATCH` | `/auth/me` | user | Get / update profile |
+| `POST` | `/auth/forgot-password` | – | Issues reset token + email |
+| `POST` | `/auth/reset-password` | – | Consume reset token |
+| `POST` | `/auth/verify-email` | – | Mark email verified |
 | `POST` | `/contact` | optional | Save lead + auto-reply |
 | `POST` | `/checkout` | user | Create order (Stripe or simulated) |
 | `GET` | `/checkout/orders/{id}` | user | Order + licenses |
@@ -163,43 +242,53 @@ All sends are also written to the `email_outbox` MongoDB collection for audit.
 | `GET` | `/me/orders` `/me/licenses` `/me/summary` | user | Customer dashboard data |
 | `*` | `/admin/*` | admin | Products / users / orders / leads / licenses / testimonials |
 
+The first-boot admin password is printed to the backend logs:
+
+```
+[SEED] Admin user created — email=admin@spikebulls.com password=XXXXXXXX (change after first login)
+```
+
+You can change it from the dashboard → Account → New password, or by `PATCH /api/auth/me` with `{"password": "..."}`.
+
 ---
 
 ## 🧱 MongoDB Collections
 
 `users` · `products` · `orders` · `licenses` · `contact_submissions` · `testimonials` · `email_outbox`
 
-Indexes created automatically on startup.
+---
+
+## 🛠 Project Conventions
+
+- Always use **yarn** for the frontend (never npm). The `yarn.lock` is the source of truth.
+- All backend API routes live under `/api/...` — the frontend hits them via `REACT_APP_BACKEND_URL`.
+- Auth tokens are stored in `localStorage` under `spb_access_token` / `spb_refresh_token` / `spb_user`.
+- License keys are formatted `SPB-XXXX-XXXX-XXXX-XXXX-XXXX`.
+- Email provider `console` writes to the logger and the `email_outbox` collection — no network calls.
 
 ---
 
-## 🛳 Deployment
+## 🔐 Security Checklist Before Going Live
 
-- **Backend** — any Python host (Fly.io, Render, Railway, AWS). Set env vars, bind to `0.0.0.0:8001`.
-- **Frontend** — `yarn build` → Vercel / Netlify / Cloudflare Pages. Set `REACT_APP_BACKEND_URL` to your backend URL.
-- **MongoDB** — MongoDB Atlas in production.
-- **Stripe webhook** — register `https://<backend-domain>/api/checkout/webhook` in the Stripe dashboard once `ENABLE_STRIPE=true`.
-
----
-
-## 🔐 Security Checklist Before Production
-
-- [ ] Rotate `JWT_SECRET`
-- [ ] Change the seeded admin password (Account → Update password in the dashboard, or via the API)
-- [ ] Set `CORS_ORIGINS` to your real domain instead of `*`
-- [ ] Enable HTTPS at the load balancer
-- [ ] Add rate-limiting on `/auth/login`, `/auth/register`, `/contact`, `/checkout`
-- [ ] Configure real SMTP / Resend
-- [ ] Confirm `STRIPE_WEBHOOK_SECRET` is set
+- [ ] Rotate `JWT_SECRET` (`openssl rand -hex 32`)
+- [ ] Change the seeded admin password
+- [ ] Set `CORS_ORIGINS` to your real frontend domain (not `*`)
+- [ ] Enable HTTPS at your reverse proxy / load balancer
+- [ ] Add rate-limiting on `/auth/login`, `/auth/register`, `/contact`, `/checkout` (drop in `slowapi`)
+- [ ] Configure real SMTP / Resend (`EMAIL_PROVIDER` ≠ `console`)
+- [ ] Set `STRIPE_WEBHOOK_SECRET` and register the webhook URL in Stripe Dashboard
 
 ---
 
-## 🧭 Roadmap
+## 🧭 Suggested Next Steps
 
-- Image upload (currently URL-based via admin)
-- Stripe Subscriptions (signals are 30-day rolling memberships sold as one-time today)
+- File upload for product images (currently URL-based via admin)
+- Stripe Subscriptions for the signals product (currently billed as 30-day one-time)
 - 2FA on admin accounts
-- License activation API for the MT5 EAs (`POST /licenses/activate`)
-- Public blog / changelog
+- License activation endpoint (`POST /licenses/activate` for the MT5 EA to hit)
+- Public changelog + blog (Markdown-based)
+- E2E tests (Playwright) and CI workflow
 
-— Built with ❤️ on Emergent.
+---
+
+Built with care. Enjoy hacking on it locally.
