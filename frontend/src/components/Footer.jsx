@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Activity, Twitter, Youtube, Send, MessageCircle } from "lucide-react";
+import { Activity, Twitter, Youtube, Send } from "lucide-react";
 import { BRAND, FOOTER_LINKS } from "../mock";
 
 export default function Footer() {
@@ -26,7 +26,6 @@ export default function Footer() {
               <SocialLink href={BRAND.social.twitter} icon={Twitter} />
               <SocialLink href={BRAND.social.youtube} icon={Youtube} />
               <SocialLink href={BRAND.social.telegram} icon={Send} />
-              <SocialLink href={BRAND.social.discord} icon={MessageCircle} />
             </div>
           </div>
 

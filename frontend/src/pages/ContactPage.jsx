@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
-import { Mail, MessageCircle, Send, Twitter, Youtube, Check, ArrowRight, Loader2 } from "lucide-react";
+import { Mail, Send, Twitter, Youtube, Check, ArrowRight, Loader2 } from "lucide-react";
 import { BRAND } from "../mock";
 import { api } from "../lib/api";
 
@@ -44,7 +44,6 @@ export default function ContactPage() {
 
               <div className="mt-10 space-y-3">
                 <ContactCard icon={Mail} label="Email" value={BRAND.email} href={`mailto:${BRAND.email}`} />
-                <ContactCard icon={MessageCircle} label="Discord" value="Join the community" href={BRAND.social.discord} />
                 <ContactCard icon={Send} label="Telegram" value="Live support channel" href={BRAND.social.telegram} />
                 <div className="flex items-center gap-2 pt-2">
                   <SocialIcon href={BRAND.social.twitter} icon={Twitter} />

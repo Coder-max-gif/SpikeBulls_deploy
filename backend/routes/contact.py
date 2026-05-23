@@ -25,17 +25,36 @@ async def submit_contact(
     await db.contact_submissions.insert_one(doc)
 
     # Auto-reply to user
-    body = (
+    user_body = (
         f"<p>Hi {submission.name},</p>"
         "<p>Thanks for reaching out to SpikeBulls. We received your message and will reply within one business day.</p>"
-        "<p>For urgent issues join our Discord or Telegram support channel.</p>"
+        "<p>For urgent issues join our Telegram support channel.</p>"
     )
     try:
         await send_email(
             submission.email,
-            "We received your message \u2014 SpikeBulls",
-            wrap_email("Message received", body),
+            "We received your message — SpikeBulls",
+            wrap_email("Message received", user_body),
             meta={"type": "contact_ack", "submission_id": submission.id},
+        )
+    except Exception:
+        pass
+
+    # Send notification to SpikeBulls email
+    admin_body = (
+        f"<p><strong>New contact submission received!</strong></p>"
+        f"<p><strong>Name:</strong> {submission.name}</p>"
+        f"<p><strong>Email:</strong> {submission.email}</p>"
+        f"<p><strong>Topic:</strong> {submission.topic}</p>"
+        f"<p><strong>Message:</strong></p>"
+        f"<p>{submission.message}</p>"
+    )
+    try:
+        await send_email(
+            "spikebulls108@gmail.com",
+            f"New Contact Submission: {submission.topic} — SpikeBulls",
+            wrap_email("New Contact Submission", admin_body),
+            meta={"type": "contact_notification", "submission_id": submission.id},
         )
     except Exception:
         pass

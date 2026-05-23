@@ -234,16 +234,13 @@ export default function ProductDetailPage() {
       <section className="py-16">
         <div className="mx-auto max-w-3xl px-5">
           <div className="glass rounded-2xl p-6">
-            <div className="flex items-center gap-3">
-              <Calendar className="h-5 w-5 text-blue-600" />
+            <div className="flex items-start gap-3">
+              <Calendar className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
               <div>
                 <div className="text-[12px] text-slate-500">Delivery</div>
                 <div className="text-[14.5px] text-slate-900">
-                  {product.delivery_type === "membership"
-                    ? "30-day rolling membership · Telegram / Discord / Email"
-                    : product.delivery_type === "download"
-                    ? "Instant digital delivery · File download available in your dashboard"
-                    : "Instant digital delivery · License key sent to your dashboard and email"}
+                  <p className="mb-2">After successful payment, we will manually send you the product files and instructions via email within 24 hours!</p>
+                  <p className="text-slate-700">Please ensure you use a valid email address that you check regularly. If you don't receive the email within 24 hours, please contact us.</p>
                 </div>
               </div>
             </div>

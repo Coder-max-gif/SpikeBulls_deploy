@@ -37,7 +37,7 @@ export default function ProductPreview() {
                 eyebrow="Forex Signals"
                 badges={[
                   { Icon: Sparkles, label: "3–6 ideas / session" },
-                  { Icon: Zap, label: "Telegram + Discord" },
+                  { Icon: Zap, label: "Telegram" },
                   { Icon: Shield, label: "Risk guidance" },
                 ]}
                 onClick={() => navigate(`/products/${signals.slug}`)}

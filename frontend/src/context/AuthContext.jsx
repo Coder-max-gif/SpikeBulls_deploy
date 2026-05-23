@@ -30,8 +30,13 @@ export function AuthProvider({ children }) {
     };
   }, [refreshMe]);
 
-  const login = async (email, password) => {
-    const res = await api.post("/auth/login", { email, password });
+  const login = async (email, password, twoFactorCode = null) => {
+    let res;
+    if (twoFactorCode) {
+      res = await api.post("/auth/login-with-2fa", { email, password, two_factor_code: twoFactorCode });
+    } else {
+      res = await api.post("/auth/login", { email, password });
+    }
     setSession(res.data);
     setUser(res.data.user);
     return res.data.user;
@@ -56,6 +61,24 @@ export function AuthProvider({ children }) {
     return res.data;
   };
 
+  const setup2FA = async () => {
+    const res = await api.post("/auth/2fa/setup");
+    return res.data;
+  };
+
+  const verify2FA = async (code) => {
+    const res = await api.post("/auth/2fa/verify", { code });
+    setUser(res.data);
+    localStorage.setItem("spb_user", JSON.stringify(res.data));
+    return res.data;
+  };
+
+  const disable2FA = async (password) => {
+    const res = await api.post("/auth/2fa/disable", { password });
+    await refreshMe();
+    return res.data;
+  };
+
   const value = {
     user,
     loading,
@@ -66,6 +89,9 @@ export function AuthProvider({ children }) {
     logout,
     updateProfile,
     refreshMe,
+    setup2FA,
+    verify2FA,
+    disable2FA,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

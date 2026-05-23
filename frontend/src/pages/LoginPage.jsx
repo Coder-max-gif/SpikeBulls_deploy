@@ -7,8 +7,10 @@ import { useAuth } from "../context/AuthContext";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [twoFactorCode, setTwoFactorCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [needs2FA, setNeeds2FA] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -19,10 +21,14 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
     try {
-      const user = await login(email.trim(), password);
+      const user = await login(email.trim(), password, needs2FA ? twoFactorCode : null);
       navigate(user.role === "admin" ? "/admin" : nextParam);
     } catch (err) {
-      setError(err.response?.data?.detail || "Login failed. Check your credentials.");
+      if (err.response?.status === 401 && err.response?.headers?.["www-authenticate"] === "TwoFactor") {
+        setNeeds2FA(true);
+      } else {
+        setError(err.response?.data?.detail || "Login failed. Check your credentials.");
+      }
     } finally {
       setLoading(false);
     }
@@ -31,17 +37,32 @@ export default function LoginPage() {
   return <AuthShell title="Welcome back" subtitle="Sign in to access your dashboard and licenses.">
     <form onSubmit={onSubmit} className="space-y-4">
       {error && <ErrorBanner message={error} />}
-      <Field icon={Mail} label="Email" type="email" value={email} onChange={setEmail} placeholder="you@example.com" required />
-      <Field icon={Lock} label="Password" type="password" value={password} onChange={setPassword} placeholder="••••••••" required />
-      <div className="flex items-center justify-between text-[12.5px]">
-        <Link to="/forgot-password" className="text-slate-600 hover:text-slate-900 transition-colors">Forgot password?</Link>
-      </div>
+      {!needs2FA && (
+        <>
+          <Field icon={Mail} label="Email" type="email" value={email} onChange={setEmail} placeholder="you@example.com" required />
+          <Field icon={Lock} label="Password" type="password" value={password} onChange={setPassword} placeholder="••••••••" required />
+          <div className="flex items-center justify-between text-[12.5px]">
+            <Link to="/forgot-password" className="text-slate-600 hover:text-slate-900 transition-colors">Forgot password?</Link>
+          </div>
+        </>
+      )}
+      {needs2FA && (
+        <div className="space-y-4">
+          <p className="text-[14px] text-slate-700">
+            Two-factor authentication is enabled. Enter the 6-digit code from your authenticator app.
+          </p>
+          <Field icon={Lock} label="2FA Code" type="text" value={twoFactorCode} onChange={(v) => setTwoFactorCode(v.replace(/\D/g, ""))} placeholder="000000" maxLength={6} required />
+          <button type="button" onClick={() => setNeeds2FA(false)} className="text-[13px] text-slate-600 hover:text-slate-900">
+            Back
+          </button>
+        </div>
+      )}
       <button type="submit" disabled={loading} className="btn-primary w-full">
         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Sign in <ArrowRight className="h-4 w-4" /></>}
       </button>
-      <p className="text-center text-[13px] text-slate-500">
+      {!needs2FA && <p className="text-center text-[13px] text-slate-500">
         New here? <Link to="/register" className="text-blue-600 hover:text-blue-700">Create an account</Link>
-      </p>
+      </p>}
     </form>
   </AuthShell>;
 }

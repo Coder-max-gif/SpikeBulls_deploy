@@ -5,12 +5,11 @@
 export const BRAND = {
   name: "SpikeBulls",
   tagline: "Premium Forex Trading Technology",
-  email: "hello@spikebulls.com",
+  email: "spikebulls108@gmail.com",
   social: {
     twitter: "#",
     youtube: "#",
-    telegram: "#",
-    discord: "#"
+    telegram: "https://t.me/SpikeBulls_FX"
   }
 };
 
@@ -190,18 +189,18 @@ export const MOCK_PRODUCTS = [
     slug: "forex-signals-pro",
     category: "signals",
     short_description: "Daily institutional-style forex & gold signals.",
-    description: "Receive 3–6 high-conviction trade ideas every session across major FX pairs, gold, and indices. Each signal includes entry, stop, multiple TPs, and risk guidance — delivered via Telegram, Discord, and email.",
+    description: "Receive 3–6 high-conviction trade ideas every session across major FX pairs, gold, and indices. Each signal includes entry, stop, multiple TPs, and risk guidance — delivered via Telegram and email.",
     price: 79.0,
     compare_at_price: 99.0,
     features: [
       "3–6 signals per trading session",
       "FX majors, gold, indices",
-      "Telegram + Discord + email delivery",
+      "Telegram + email delivery",
       "Entry / SL / multi-TP structure",
       "Weekly market analysis",
       "30-day rolling subscription",
     ],
-    platforms: ["Telegram", "Discord", "Email"],
+    platforms: ["Telegram", "Email"],
     images: [
       "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?crop=entropy&cs=srgb&fm=jpg&q=85",
     ],
@@ -250,7 +249,6 @@ export const MOCK_PRODUCTS = [
       "Algo Strategy (lifetime)",
       "Automation Suite (lifetime)",
       "3 months Forex Signals included",
-      "Priority Discord channel",
       "VPS setup assistance",
     ],
     platforms: ["MetaTrader 5", "VPS", "Cloud"],
@@ -415,7 +413,6 @@ export const PRICING_PLANS = [
       "Algo Strategy (full automation)",
       "Lifetime updates & support",
       "2 MT5 licenses",
-      "Priority Discord channel",
       "VPS setup assistance"
     ],
     cta: "Get Bundle",
@@ -483,22 +480,21 @@ export const FOOTER_LINKS = {
     { label: "Pricing", href: "/pricing" }
   ],
   Company: [
-    { label: "About", href: "#" },
-    { label: "Performance", href: "/#performance" },
-    { label: "Press", href: "#" },
+    { label: "About", href: "/about" },
+    { label: "Performance", href: "/performance" },
+    { label: "Press", href: "/press" },
     { label: "Contact", href: "/contact" }
   ],
   Support: [
     { label: "FAQ", href: "/faq" },
-    { label: "Documentation", href: "#" },
-    { label: "Setup Guide", href: "#" },
-    { label: "Discord", href: "#" }
+    { label: "Documentation", href: "/documentation" },
+    { label: "Setup Guide", href: "/setup-guide" }
   ],
   Legal: [
-    { label: "Terms", href: "#" },
-    { label: "Privacy", href: "#" },
-    { label: "Risk Disclosure", href: "#" },
-    { label: "Refund Policy", href: "#" }
+    { label: "Terms", href: "/terms" },
+    { label: "Privacy", href: "/privacy" },
+    { label: "Risk Disclosure", href: "/risk-disclosure" },
+    { label: "Refund Policy", href: "/refund-policy" }
   ]
 };
 

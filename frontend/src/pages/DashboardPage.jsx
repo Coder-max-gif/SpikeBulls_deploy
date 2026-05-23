@@ -252,10 +252,17 @@ function Orders({ orders }) {
 }
 
 function Account({ user, updateProfile, onLogout }) {
+  const { setup2FA, verify2FA, disable2FA } = useAuth();
   const [name, setName] = useState(user?.name || "");
   const [password, setPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
+  const [twoFAStep, setTwoFAStep] = useState(user?.two_factor_enabled ? "enabled" : "disabled");
+  const [twoFASecret, setTwoFASecret] = useState("");
+  const [twoFAQr, setTwoFAQr] = useState("");
+  const [twoFACode, setTwoFACode] = useState("");
+  const [disablePassword, setDisablePassword] = useState("");
+
   const save = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -272,25 +279,123 @@ function Account({ user, updateProfile, onLogout }) {
       setSaving(false);
     }
   };
+
+  const handleSetup2FA = async () => {
+    try {
+      const data = await setup2FA();
+      setTwoFASecret(data.secret);
+      setTwoFAQr(data.qr_code);
+      setTwoFAStep("setup");
+    } catch (err) {
+      alert(err.response?.data?.detail || "Failed to setup 2FA");
+    }
+  };
+
+  const handleVerify2FA = async () => {
+    try {
+      await verify2FA(twoFACode);
+      setTwoFAStep("enabled");
+      setMsg("2FA enabled!");
+    } catch (err) {
+      alert(err.response?.data?.detail || "Invalid code");
+    }
+  };
+
+  const handleDisable2FA = async () => {
+    try {
+      await disable2FA(disablePassword);
+      setTwoFAStep("disabled");
+      setDisablePassword("");
+      setMsg("2FA disabled!");
+    } catch (err) {
+      alert(err.response?.data?.detail || "Invalid password");
+    }
+  };
+
   return (
-    <div className="max-w-xl glass rounded-2xl p-6">
-      <h2 className="font-display text-[22px] text-slate-900 font-medium">Account settings</h2>
-      <p className="mt-1 text-[13px] text-slate-500">Signed in as <span className="text-slate-700">{user?.email}</span></p>
-      <form onSubmit={save} className="mt-6 space-y-4">
-        <div>
-          <label className="text-[12px] text-slate-600">Name</label>
-          <input className="mt-2 w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-[14px] text-slate-900 focus:outline-none focus:border-blue-400/50" value={name} onChange={(e) => setName(e.target.value)} />
-        </div>
-        <div>
-          <label className="text-[12px] text-slate-600">New password (optional)</label>
-          <input type="password" className="mt-2 w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-[14px] text-slate-900 focus:outline-none focus:border-blue-400/50" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Leave empty to keep current password" autoComplete="new-password" />
-        </div>
-        {msg && <p className="text-[13px] text-slate-700">{msg}</p>}
-        <div className="flex items-center gap-3">
-          <button disabled={saving} className="btn-primary !py-2.5">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save changes"}</button>
-          <button type="button" onClick={onLogout} className="btn-ghost !py-2.5">Log out</button>
-        </div>
-      </form>
+    <div className="space-y-6">
+      <div className="max-w-xl glass rounded-2xl p-6">
+        <h2 className="font-display text-[22px] text-slate-900 font-medium">Account settings</h2>
+        <p className="mt-1 text-[13px] text-slate-500">Signed in as <span className="text-slate-700">{user?.email}</span></p>
+        <form onSubmit={save} className="mt-6 space-y-4">
+          <div>
+            <label className="text-[12px] text-slate-600">Name</label>
+            <input className="mt-2 w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-[14px] text-slate-900 focus:outline-none focus:border-blue-400/50" value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
+          <div>
+            <label className="text-[12px] text-slate-600">New password (optional)</label>
+            <input type="password" className="mt-2 w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-[14px] text-slate-900 focus:outline-none focus:border-blue-400/50" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Leave empty to keep current password" autoComplete="new-password" />
+          </div>
+          {msg && <p className="text-[13px] text-slate-700">{msg}</p>}
+          <div className="flex items-center gap-3">
+            <button disabled={saving} className="btn-primary !py-2.5">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save changes"}</button>
+            <button type="button" onClick={onLogout} className="btn-ghost !py-2.5">Log out</button>
+          </div>
+        </form>
+      </div>
+
+      <div className="max-w-xl glass rounded-2xl p-6">
+        <h2 className="font-display text-[22px] text-slate-900 font-medium">Two-factor authentication</h2>
+        <p className="mt-1 text-[13px] text-slate-500">Add an extra layer of security to your account.</p>
+
+        {twoFAStep === "disabled" && (
+          <div className="mt-6">
+            <button onClick={handleSetup2FA} className="btn-primary !py-2.5">
+              Enable 2FA
+            </button>
+          </div>
+        )}
+
+        {twoFAStep === "setup" && (
+          <div className="mt-6 space-y-4">
+            <div className="glass rounded-xl p-4 bg-white">
+              <img src={`data:image/png;base64,${twoFAQr}`} alt="QR Code" className="mx-auto" />
+            </div>
+            <p className="text-[13px] text-slate-600">
+              Scan the QR code with your authenticator app (Google Authenticator, Authy, etc.), or enter this secret: <code className="text-blue-700 bg-slate-100 px-2 py-1 rounded">{twoFASecret}</code>
+            </p>
+            <div>
+              <label className="text-[12px] text-slate-600">Enter the 6-digit code from your app</label>
+              <input
+                type="text"
+                maxLength={6}
+                className="mt-2 w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-[14px] text-slate-900 focus:outline-none focus:border-blue-400/50"
+                value={twoFACode}
+                onChange={(e) => setTwoFACode(e.target.value.replace(/\D/g, ""))}
+              />
+            </div>
+            <div className="flex gap-3">
+              <button onClick={handleVerify2FA} className="btn-primary !py-2.5">
+                Verify & enable
+              </button>
+              <button onClick={() => setTwoFAStep("disabled")} className="btn-ghost !py-2.5">
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        {twoFAStep === "enabled" && (
+          <div className="mt-6 space-y-4">
+            <div className="flex items-center gap-2 text-emerald-700 bg-emerald-500/10 border border-emerald-500/30 rounded-lg px-3 py-2.5">
+              <CheckCircle2 className="h-4 w-4" />
+              <span className="text-[13px]">2FA is currently enabled</span>
+            </div>
+            <div>
+              <label className="text-[12px] text-slate-600">Enter your password to disable 2FA</label>
+              <input
+                type="password"
+                className="mt-2 w-full bg-white border border-slate-200 rounded-lg px-3 py-2.5 text-[14px] text-slate-900 focus:outline-none focus:border-blue-400/50"
+                value={disablePassword}
+                onChange={(e) => setDisablePassword(e.target.value)}
+              />
+            </div>
+            <button onClick={handleDisable2FA} className="btn-ghost !py-2.5 !text-rose-700 hover:!bg-rose-50">
+              Disable 2FA
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -26,6 +26,7 @@ class UserPublic(UserBase):
     id: str
     role: UserRole
     email_verified: bool
+    two_factor_enabled: bool
     created_at: datetime
 
 
@@ -38,6 +39,8 @@ class UserInDB(UserBase):
     verify_token: str | None = None
     reset_token: str | None = None
     reset_token_expires: datetime | None = None
+    two_factor_enabled: bool = False
+    two_factor_secret: str | None = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 

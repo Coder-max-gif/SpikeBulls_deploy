@@ -1,6 +1,10 @@
 import secrets
+import io
+import base64
 from datetime import datetime, timedelta, timezone
 
+import pyotp
+import qrcode
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr
 
@@ -36,6 +40,7 @@ def _to_public(user: dict) -> UserPublic:
         name=user["name"],
         role=user.get("role", "user"),
         email_verified=user.get("email_verified", False),
+        two_factor_enabled=user.get("two_factor_enabled", False),
         created_at=user["created_at"],
     )
 
@@ -196,3 +201,112 @@ async def verify_email(payload: VerifyEmailRequest):
         {"$set": {"email_verified": True, "verify_token": None}},
     )
     return {"ok": True, "message": "Email verified."}
+
+
+class TwoFASetupResponse(BaseModel):
+    secret: str
+    qr_code: str
+
+
+@router.post("/2fa/setup", response_model=TwoFASetupResponse)
+async def setup_2fa(user=Depends(get_current_user)):
+    db = get_db()
+    if user.get("two_factor_enabled"):
+        raise HTTPException(status_code=400, detail="2FA already enabled")
+
+    secret = pyotp.random_base32()
+    await db.users.update_one(
+        {"id": user["id"]},
+        {"$set": {"two_factor_secret": secret, "updated_at": datetime.now(timezone.utc)}},
+    )
+
+    totp = pyotp.TOTP(secret)
+    uri = totp.provisioning_uri(name=user["email"], issuer_name="SpikeBulls")
+    img = qrcode.make(uri)
+    buffer = io.BytesIO()
+    img.save(buffer, format="PNG")
+    buffer.seek(0)
+    qr_code_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+
+    return TwoFASetupResponse(secret=secret, qr_code=qr_code_base64)
+
+
+class TwoFAVerifyRequest(BaseModel):
+    code: str
+
+
+@router.post("/2fa/verify", response_model=UserPublic)
+async def verify_2fa(payload: TwoFAVerifyRequest, user=Depends(get_current_user)):
+    db = get_db()
+    secret = user.get("two_factor_secret")
+    if not secret:
+        raise HTTPException(status_code=400, detail="2FA not set up")
+
+    totp = pyotp.TOTP(secret)
+    if not totp.verify(payload.code):
+        raise HTTPException(status_code=401, detail="Invalid 2FA code")
+
+    await db.users.update_one(
+        {"id": user["id"]},
+        {"$set": {"two_factor_enabled": True, "updated_at": datetime.now(timezone.utc)}},
+    )
+
+    updated = await db.users.find_one({"id": user["id"]})
+    return _to_public(updated)
+
+
+class TwoFADisableRequest(BaseModel):
+    password: str
+
+
+@router.post("/2fa/disable")
+async def disable_2fa(payload: TwoFADisableRequest, user=Depends(get_current_user)):
+    db = get_db()
+    if not user.get("two_factor_enabled"):
+        raise HTTPException(status_code=400, detail="2FA not enabled")
+
+    if not verify_password(payload.password, user["password_hash"]):
+        raise HTTPException(status_code=401, detail="Invalid password")
+
+    await db.users.update_one(
+        {"id": user["id"]},
+        {
+            "$set": {
+                "two_factor_enabled": False,
+                "two_factor_secret": None,
+                "updated_at": datetime.now(timezone.utc),
+            }
+        },
+    )
+
+    return {"ok": True, "message": "2FA disabled"}
+
+
+class LoginWith2FARequest(BaseModel):
+    email: EmailStr
+    password: str
+    two_factor_code: str | None = None
+
+
+@router.post("/login-with-2fa", response_model=TokenPair)
+async def login_with_2fa(payload: LoginWith2FARequest):
+    db = get_db()
+    user = await db.users.find_one({"email": payload.email.lower()})
+    if not user or not verify_password(payload.password, user["password_hash"]):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    if not user.get("is_active", True):
+        raise HTTPException(status_code=403, detail="Account disabled")
+
+    if user.get("two_factor_enabled"):
+        if not payload.two_factor_code:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="2FA code required",
+                headers={"WWW-Authenticate": "TwoFactor"},
+            )
+        secret = user.get("two_factor_secret")
+        totp = pyotp.TOTP(secret)
+        if not totp.verify(payload.two_factor_code):
+            raise HTTPException(status_code=401, detail="Invalid 2FA code")
+
+    return _build_token_pair(user)

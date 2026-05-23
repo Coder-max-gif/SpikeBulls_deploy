@@ -9,10 +9,10 @@ import {
   Star,
   Key,
   LogOut,
-  Activity,
   ExternalLink,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import SpikeBullsLogo from "../../components/SpikeBullsLogo";
 
 const LINKS = [
   { to: "/admin", label: "Overview", icon: LayoutDashboard, end: true },
@@ -31,12 +31,7 @@ export default function AdminLayout() {
     <div className="min-h-screen bg-app flex">
       <aside className="hidden md:flex w-60 shrink-0 flex-col border-r border-slate-200 bg-white">
         <Link to="/" className="flex items-center gap-2.5 px-5 h-16 border-b border-slate-200">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center">
-            <Activity className="h-4 w-4 text-slate-900" strokeWidth={2.5} />
-          </div>
-          <span className="font-display text-[16px] font-semibold tracking-tight text-slate-900">
-            SpikeBulls
-          </span>
+          <SpikeBullsLogo />
           <span className="ml-auto text-[10px] uppercase tracking-wider text-slate-500">Admin</span>
         </Link>
         <nav className="flex-1 p-3 space-y-1">
@@ -82,9 +77,7 @@ export default function AdminLayout() {
         {/* mobile bar */}
         <div className="md:hidden flex items-center justify-between px-5 h-14 border-b border-slate-200 bg-white">
           <Link to="/" className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center">
-              <Activity className="h-3.5 w-3.5 text-slate-900" strokeWidth={2.5} />
-            </div>
+            <SpikeBullsLogo />
             <span className="font-display text-[14px] font-semibold tracking-tight text-slate-900">Admin</span>
           </Link>
           <button onClick={() => { logout(); navigate("/"); }} className="text-[12px] text-rose-600">Sign out</button>

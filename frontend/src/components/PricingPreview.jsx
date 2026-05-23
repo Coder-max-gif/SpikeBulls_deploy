@@ -40,7 +40,6 @@ export default function PricingPreview() {
         "Algorithm Subscription (6 Months)",
         "All features included",
         "Priority support",
-        "VIP Discord access",
         "VPS setup assistance",
         "Best value!",
       ],

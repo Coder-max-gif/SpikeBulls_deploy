@@ -13,6 +13,15 @@ import ProductDetailPage from "./pages/ProductDetailPage";
 import PricingPage from "./pages/PricingPage";
 import FAQPage from "./pages/FAQPage";
 import ContactPage from "./pages/ContactPage";
+import AboutPage from "./pages/AboutPage";
+import PerformancePage from "./pages/PerformancePage";
+import PressPage from "./pages/PressPage";
+import DocumentationPage from "./pages/DocumentationPage";
+import SetupGuidePage from "./pages/SetupGuidePage";
+import TermsPage from "./pages/TermsPage";
+import PrivacyPage from "./pages/PrivacyPage";
+import RiskDisclosurePage from "./pages/RiskDisclosurePage";
+import RefundPolicyPage from "./pages/RefundPolicyPage";
 
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -48,6 +57,15 @@ function App() {
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/faq" element={<FAQPage />} />
             <Route path="/contact" element={<ContactPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/performance" element={<PerformancePage />} />
+            <Route path="/press" element={<PressPage />} />
+            <Route path="/documentation" element={<DocumentationPage />} />
+            <Route path="/setup-guide" element={<SetupGuidePage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/risk-disclosure" element={<RiskDisclosurePage />} />
+            <Route path="/refund-policy" element={<RefundPolicyPage />} />
 
             {/* Auth */}
             <Route path="/login" element={<LoginPage />} />

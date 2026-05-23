@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { CheckCircle2, ArrowRight, Loader2, Copy, Key } from "lucide-react";
+import { CheckCircle2, ArrowRight, Loader2, Copy, Key, Receipt } from "lucide-react";
 import { api } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 
@@ -41,9 +41,9 @@ export default function CheckoutSuccessPage() {
             <div className="mx-auto h-16 w-16 rounded-full bg-emerald-500/15 border border-emerald-400/30 flex items-center justify-center">
               <CheckCircle2 className="h-7 w-7 text-emerald-400" />
             </div>
-            <h1 className="mt-6 font-display text-[40px] sm:text-[52px] text-slate-900 font-semibold tracking-tight">Order confirmed</h1>
+            <h1 className="mt-6 font-display text-[40px] sm:text-[52px] text-slate-900 font-semibold tracking-tight">Order confirmed!</h1>
             <p className="mt-3 text-slate-600 text-[15.5px]">
-              Thanks for your purchase. Your licenses are ready in your dashboard.
+              Thanks for your purchase! We will send you the product files and instructions via email within 24 hours.
               {simulated && (
                 <span className="block mt-2 text-amber-600 text-[13px]">
                   (Simulated checkout — enable Stripe in backend/.env for live payments.)
@@ -53,35 +53,55 @@ export default function CheckoutSuccessPage() {
 
             <div className="mt-8 glass-strong rounded-2xl p-6 text-left">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-display text-[18px] text-slate-900 font-medium">Your licenses</h2>
+                <h2 className="font-display text-[18px] text-slate-900 font-medium">What happens next?</h2>
                 <Key className="h-4 w-4 text-slate-600" />
+              </div>
+              <div className="space-y-4 text-[14px] text-slate-700">
+                <p>1. We will review your order and verify your payment.</p>
+                <p>2. Within 24 hours, we will send you an email with the product files, installation instructions, and any other relevant information.</p>
+                <p>3. Please make sure you check your email inbox (and spam folder, just in case) at the email address you used to sign up!</p>
+                <p>4. If you don't receive anything within 24 hours, please contact us via our contact page.</p>
+              </div>
+            </div>
+
+            <div className="mt-8 glass-strong rounded-2xl p-6 text-left">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-display text-[18px] text-slate-900 font-medium">Your order details</h2>
+                <Receipt className="h-4 w-4 text-slate-600" />
               </div>
               {loading ? (
                 <div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-slate-500" /></div>
               ) : !data ? (
-                <p className="text-[13.5px] text-slate-600">Sign in to view your licenses.</p>
-              ) : data.licenses.length === 0 ? (
-                <p className="text-[13.5px] text-slate-600">Your licenses will appear here shortly.</p>
+                <p className="text-[13.5px] text-slate-600">Sign in to view your order details.</p>
               ) : (
-                <ul className="space-y-2">
-                  {data.licenses.map((l) => (
-                    <li key={l.id} className="flex flex-wrap items-center justify-between gap-2 glass rounded-lg p-3">
-                      <span className="text-[14px] text-slate-900">{l.product_name}</span>
-                      <div className="flex items-center gap-2">
-                        <code className="text-[12px] text-blue-700 bg-slate-100 border border-slate-200 px-2 py-1 rounded-md">{l.key}</code>
-                        <button onClick={() => copy(l.key)} className="h-7 w-7 rounded-md glass flex items-center justify-center text-slate-600 hover:text-slate-900">
-                          {copiedKey === l.key ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
-                        </button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-700">Order ID:</span>
+                    <span className="text-slate-900 font-mono text-[12px]">{data.order.id.slice(0, 8)}...</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-700">Items:</span>
+                    <span className="text-slate-900">{data.order.items.map((i) => i.name).join(", ")}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-700">Total:</span>
+                    <span className="text-slate-900 font-semibold">${data.order.total.toFixed(2)}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-700">Status:</span>
+                    <span className={`px-2 py-0.5 rounded-md text-[11px] whitespace-nowrap ${
+                      data.order.status === "paid" ? "bg-emerald-500/10 text-emerald-600" :
+                      data.order.status === "pending" ? "bg-amber-500/10 text-amber-600" :
+                      "bg-rose-500/10 text-rose-600"
+                    }`}>{data.order.status}</span>
+                  </div>
+                </div>
               )}
             </div>
 
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link to="/dashboard" className="btn-primary">Go to dashboard <ArrowRight className="h-4 w-4" /></Link>
-              <Link to="/products" className="btn-ghost">Browse more products</Link>
+              <Link to="/contact" className="btn-ghost">Contact us</Link>
             </div>
           </motion.div>
         </div>
