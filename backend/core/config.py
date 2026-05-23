@@ -9,8 +9,8 @@ load_dotenv(ROOT_DIR / ".env")
 
 class Settings:
     # Mongo
-    MONGO_URL: str = os.environ["MONGO_URL"]
-    DB_NAME: str = os.environ["DB_NAME"]
+    MONGO_URL: str = os.environ.get("MONGO_URL", "mongodb://localhost:27017")
+    DB_NAME: str = os.environ.get("DB_NAME", "spikebulls")
     CORS_ORIGINS: str = os.environ.get("CORS_ORIGINS", "*")
 
     # App
@@ -18,7 +18,7 @@ class Settings:
     APP_URL: str = os.environ.get("APP_URL", "http://localhost:3000")
 
     # Auth
-    JWT_SECRET: str = os.environ.get("JWT_SECRET", "change-me")
+    JWT_SECRET: str = os.environ.get("JWT_SECRET", "change-me-in-production-please")
     JWT_ALGORITHM: str = os.environ.get("JWT_ALGORITHM", "HS256")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
     REFRESH_TOKEN_EXPIRE_DAYS: int = int(os.environ.get("REFRESH_TOKEN_EXPIRE_DAYS", "30"))
