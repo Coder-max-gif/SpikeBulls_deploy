@@ -49,6 +49,13 @@ class Settings:
     SMTP_USER: str = os.environ.get("SMTP_USER", "")
     SMTP_PASS: str = os.environ.get("SMTP_PASS", "")
     RESEND_API_KEY: str = os.environ.get("RESEND_API_KEY", "")
+    
+    # Manual Binance Payment Workflow
+    PAYMENT_METHOD: str = os.environ.get("PAYMENT_METHOD", "binance")
+    BINANCE_QR_TEXT: str = os.environ.get("BINANCE_QR_TEXT", "")
+    BINANCE_PAY_ADDRESS: str = os.environ.get("BINANCE_PAY_ADDRESS", "")
+    BINANCE_PAY_EMAIL: str = os.environ.get("BINANCE_PAY_EMAIL", "spikebulls108@gmail.com")
+    BINANCE_PAYMENT_INSTRUCTIONS: str = os.environ.get("BINANCE_PAYMENT_INSTRUCTIONS", "Send USDT to the address above, then click \"I've Paid\" and upload your payment proof!")
 
 
 @lru_cache()
