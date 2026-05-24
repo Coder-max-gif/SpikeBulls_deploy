@@ -51,6 +51,23 @@ export default function CheckoutSuccessPage() {
               )}
             </p>
 
+            {data?.order?.status === "pending" && (
+              <div className="mt-8 glass-strong rounded-2xl p-6 text-left border-2 border-amber-400/30">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="font-display text-[18px] text-slate-900 font-medium">📱 Complete Payment via Binance/Trust Wallet</h2>
+                </div>
+                <div className="space-y-4 text-[14px] text-slate-700">
+                  <p><strong>1.</strong> Open your Binance app or Trust Wallet</p>
+                  <p><strong>2.</strong> Send USDT to this address:</p>
+                  <div className="bg-slate-100 p-4 rounded-lg font-mono text-[12px] break-all border border-slate-200">
+                    Your Binance USDT address will be here (set via BINANCE_PAY_ADDRESS env var)
+                  </div>
+                  <p><strong>3.</strong> After sending, you'll receive your product within 24 hours!</p>
+                  <p><strong>4.</strong> You can check your order status in your dashboard anytime.</p>
+                </div>
+              </div>
+            )}
+
             <div className="mt-8 glass-strong rounded-2xl p-6 text-left">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-display text-[18px] text-slate-900 font-medium">What happens next?</h2>
