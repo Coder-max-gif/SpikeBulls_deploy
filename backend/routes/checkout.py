@@ -117,18 +117,18 @@ async def create_checkout(payload: CheckoutCreate, user=Depends(get_current_user
             "checkout_url": session["url"],
         }
 
-    # --- Simulated checkout (Stripe disabled) ---
-    order.simulated = True
-    order.status = "paid"
-    license_ids = await _grant_licenses(order, products)
-    order.license_ids = license_ids
+    # --- Manual Binance Payment Checkout ---
+    order.payment_provider = "binance"
+    order.status = "pending"
     order.updated_at = datetime.now(timezone.utc)
     await db.orders.insert_one(order.model_dump())
-    await _send_purchase_email(order, products, license_ids)
     return {
-        "mode": "simulated",
+        "mode": "binance",
         "order_id": order.id,
-        "checkout_url": f"{settings.APP_URL}/checkout/success?order_id={order.id}&simulated=1",
+        "checkout_url": f"{settings.APP_URL}/checkout/success?order_id={order.id}",
+        "payment_instructions": settings.BINANCE_PAYMENT_INSTRUCTIONS,
+        "binance_address": settings.BINANCE_PAY_ADDRESS,
+        "binance_email": settings.BINANCE_PAY_EMAIL,
     }
 
 
