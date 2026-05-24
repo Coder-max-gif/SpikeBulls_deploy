@@ -124,6 +124,49 @@ async def admin_list_orders():
     return [_clean(d) for d in docs]
 
 
+@router.post("/orders/{order_id}/activate")
+async def admin_activate_order(order_id: str):
+    db = get_db()
+    order = await db.orders.find_one({"id": order_id})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    if order["status"] != "pending":
+        raise HTTPException(status_code=400, detail="Only pending orders can be activated")
+    
+    now = datetime.now(timezone.utc)
+    updates = {
+        "status": "active",
+        "activated_at": now,
+        "updated_at": now
+    }
+    
+    subscription_duration = order.get("subscription_duration")
+    if subscription_duration:
+        updates["subscription_expires_at"] = now + timezone.timedelta(days=subscription_duration)
+    
+    await db.orders.update_one({"id": order_id}, {"$set": updates})
+    updated_order = await db.orders.find_one({"id": order_id})
+    return _clean(updated_order)
+
+
+@router.post("/orders/{order_id}/reject")
+async def admin_reject_order(order_id: str):
+    db = get_db()
+    order = await db.orders.find_one({"id": order_id})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    if order["status"] != "pending":
+        raise HTTPException(status_code=400, detail="Only pending orders can be rejected")
+    
+    now = datetime.now(timezone.utc)
+    await db.orders.update_one(
+        {"id": order_id},
+        {"$set": {"status": "rejected", "updated_at": now}}
+    )
+    updated_order = await db.orders.find_one({"id": order_id})
+    return _clean(updated_order)
+
+
 # ---- Leads / Contact submissions ----
 @router.get("/leads")
 async def admin_list_leads():

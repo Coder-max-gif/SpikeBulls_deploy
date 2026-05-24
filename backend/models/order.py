@@ -40,6 +40,10 @@ class Order(BaseModel):
     binance_transaction_id: Optional[str] = None
     payment_notes: Optional[str] = None
     
+    # Subscription lifecycle
+    activated_at: Optional[datetime] = None
+    subscription_expires_at: Optional[datetime] = None
+    
     stripe_session_id: Optional[str] = None
     stripe_payment_intent: Optional[str] = None
     license_ids: list[str] = Field(default_factory=list)

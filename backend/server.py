@@ -12,7 +12,7 @@ from core.config import settings
 from core.database import close_db, ensure_indexes
 from routes.admin import router as admin_router
 from routes.auth import router as auth_router
-from routes.checkout import router as checkout_router
+from routes.checkout import router as checkout_router, orders_router
 from routes.contact import router as contact_router
 from routes.downloads import router as downloads_router
 from routes.licenses import router as licenses_router
@@ -68,6 +68,7 @@ app.include_router(products_router, prefix="/api")
 app.include_router(testimonials_router, prefix="/api")
 app.include_router(contact_router, prefix="/api")
 app.include_router(checkout_router, prefix="/api")
+app.include_router(orders_router, prefix="/api")
 app.include_router(user_router, prefix="/api")
 app.include_router(admin_router, prefix="/api")
 app.include_router(downloads_router, prefix="/api")
