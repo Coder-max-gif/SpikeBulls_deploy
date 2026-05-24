@@ -6,6 +6,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 import HomePage from "./pages/HomePage";
 import ProductsPage from "./pages/ProductsPage";
@@ -107,6 +108,7 @@ function App() {
           <Footer />
         </AuthProvider>
       </BrowserRouter>
+      <SpeedInsights />
     </div>
   );
 }
