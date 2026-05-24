@@ -214,16 +214,39 @@ function Orders({ orders }) {
   if (orders.length === 0) {
     return <EmptyState message="You haven't placed any orders yet." cta={{ to: "/products", label: "Browse products" }} />;
   }
+  
+  const getStatusColor = (status) => {
+    switch(status) {
+      case "active":
+      case "paid":
+      case "fulfilled":
+        return "bg-emerald-500/10 text-emerald-600";
+      case "pending":
+        return "bg-amber-500/10 text-amber-600";
+      case "rejected":
+      case "failed":
+      case "refunded":
+      case "cancelled":
+        return "bg-rose-500/10 text-rose-600";
+      case "expired":
+        return "bg-slate-500/10 text-slate-600";
+      default:
+        return "bg-slate-500/10 text-slate-600";
+    }
+  };
+  
   return (
     <div className="glass rounded-2xl overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full text-[13.5px] min-w-[600px]">
+        <table className="w-full text-[13.5px] min-w-[800px]">
           <thead>
             <tr className="text-left text-slate-500 text-[11.5px] uppercase tracking-wider border-b border-slate-200">
               <th className="px-4 sm:px-5 py-3">Order</th>
               <th className="px-4 sm:px-5 py-3">Items</th>
               <th className="px-4 sm:px-5 py-3">Total</th>
               <th className="px-4 sm:px-5 py-3">Status</th>
+              <th className="px-4 sm:px-5 py-3">Activated</th>
+              <th className="px-4 sm:px-5 py-3">Expires</th>
               <th className="px-4 sm:px-5 py-3">Date</th>
             </tr>
           </thead>
@@ -234,13 +257,11 @@ function Orders({ orders }) {
                 <td className="px-4 sm:px-5 py-3 text-slate-800 break-words max-w-[200px]">{o.items.map((i) => i.name).join(", ")}</td>
                 <td className="px-4 sm:px-5 py-3 text-slate-900 whitespace-nowrap">${o.total.toFixed(2)}</td>
                 <td className="px-4 sm:px-5 py-3">
-                  <span className={`px-2 py-0.5 rounded-md text-[11px] whitespace-nowrap ${
-                    o.status === "paid" ? "bg-emerald-500/10 text-emerald-600" :
-                    o.status === "pending" ? "bg-amber-500/10 text-amber-600" :
-                    "bg-rose-500/10 text-rose-600"
-                  }`}>{o.status}</span>
+                  <span className={`px-2 py-0.5 rounded-md text-[11px] whitespace-nowrap ${getStatusColor(o.status)}`}>{o.status}</span>
                   {o.simulated && <span className="ml-1 sm:ml-2 px-1.5 py-0.5 rounded text-[10px] whitespace-nowrap bg-violet-500/10 text-violet-600">simulated</span>}
                 </td>
+                <td className="px-4 sm:px-5 py-3 text-slate-600 whitespace-nowrap">{o.activated_at ? new Date(o.activated_at).toLocaleDateString() : "-"}</td>
+                <td className="px-4 sm:px-5 py-3 text-slate-600 whitespace-nowrap">{o.subscription_expires_at ? new Date(o.subscription_expires_at).toLocaleDateString() : "-"}</td>
                 <td className="px-4 sm:px-5 py-3 text-slate-600 whitespace-nowrap">{new Date(o.created_at).toLocaleDateString()}</td>
               </tr>
             ))}

@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends
 
 from core.database import get_db
@@ -14,8 +15,24 @@ def _clean(d):
 @router.get("/orders")
 async def my_orders(user=Depends(get_current_user)):
     db = get_db()
+    now = datetime.now(timezone.utc)
     docs = await db.orders.find({"user_id": user["id"]}).sort("created_at", -1).to_list(100)
-    return [_clean(d) for d in docs]
+    
+    processed_orders = []
+    for order in docs:
+        order.pop("_id", None)
+        processed_order = order.copy()
+        
+        if processed_order.get("status") == "active" and processed_order.get("subscription_expires_at"):
+            expires_at = processed_order["subscription_expires_at"]
+            if isinstance(expires_at, str):
+                expires_at = datetime.fromisoformat(expires_at.replace("Z", "+00:00"))
+            if expires_at < now:
+                processed_order["status"] = "expired"
+        
+        processed_orders.append(processed_order)
+    
+    return processed_orders
 
 
 @router.get("/licenses")
