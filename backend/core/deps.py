@@ -1,6 +1,6 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-import jwt
+from jose import jwt
 
 from .database import get_db
 from .security import decode_token
