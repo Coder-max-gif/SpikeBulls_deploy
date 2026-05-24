@@ -5,7 +5,8 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import FileResponse
-from jwt import InvalidTokenError, ExpiredSignatureError
+from jose import jwt
+from jose.exceptions import ExpiredSignatureError, JWTError
 
 from core.config import settings
 from core.database import get_db
@@ -68,7 +69,7 @@ async def download_file(
         payload = decode_download_token(token)
     except ExpiredSignatureError:
         raise HTTPException(status_code=403, detail="Download token expired")
-    except InvalidTokenError:
+    except JWTError:
         raise HTTPException(status_code=403, detail="Invalid download token")
     
     user_id = payload["sub"]
