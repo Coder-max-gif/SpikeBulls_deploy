@@ -43,7 +43,13 @@ export default function ProductDetailPage() {
       if (result.mode === "stripe" && result.checkout_url) {
         window.location.href = result.checkout_url;
       } else {
-        navigate(`/checkout/success?order_id=${result.order_id}&simulated=1`);
+        sessionStorage.setItem("binancePaymentInfo", JSON.stringify({
+          order_id: result.order_id,
+          payment_instructions: result.payment_instructions,
+          binance_address: result.binance_address,
+          binance_email: result.binance_email
+        }));
+        navigate(`/checkout/success?order_id=${result.order_id}`);
       }
     } catch (err) {
       setBuyError(err.response?.data?.detail || "Checkout failed.");
