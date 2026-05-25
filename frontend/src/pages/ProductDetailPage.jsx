@@ -245,7 +245,7 @@ export default function ProductDetailPage() {
               <div>
                 <div className="text-[12px] text-slate-500">Delivery</div>
                 <div className="text-[14.5px] text-slate-900">
-                  <p className="mb-2">After successful payment, we will manually send you the product files and instructions via email within 24 hours!</p>
+                  <p className="mb-2">Pay with Trust Wallet, then after successful payment, we will manually send you the product files and instructions via email within 24 hours!</p>
                   <p className="text-slate-700">Please ensure you use a valid email address that you check regularly. If you don't receive the email within 24 hours, please contact us.</p>
                 </div>
               </div>

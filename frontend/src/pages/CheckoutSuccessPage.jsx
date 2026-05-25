@@ -60,10 +60,10 @@ export default function CheckoutSuccessPage() {
             {(data?.order?.status === "pending" || paymentInfo) && (
               <div className="mt-8 glass-strong rounded-2xl p-6 text-left border-2 border-amber-400/30">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="font-display text-[18px] text-slate-900 font-medium">📱 Complete Payment via Binance/Trust Wallet</h2>
+                  <h2 className="font-display text-[18px] text-slate-900 font-medium">📱 Complete Payment via Trust Wallet</h2>
                 </div>
                 <div className="space-y-4 text-[14px] text-slate-700">
-                  <p><strong>1.</strong> Open your Binance app or Trust Wallet</p>
+                  <p><strong>1.</strong> Open your Trust Wallet app</p>
                   <p><strong>2.</strong> Send USDT to this address:</p>
                   <div className="bg-slate-100 p-4 rounded-lg font-mono text-[12px] break-all border border-slate-200 flex items-center gap-3">
                     <span className="flex-1">{paymentInfo?.binance_address || "Your Binance USDT address will be here"}</span>
