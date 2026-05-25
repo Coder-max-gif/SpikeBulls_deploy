@@ -1,3 +1,4 @@
+import logging
 import secrets
 import io
 import base64
@@ -7,6 +8,8 @@ import pyotp
 import qrcode
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr
+
+logger = logging.getLogger(__name__)
 
 from core.config import settings
 from core.database import get_db
@@ -81,7 +84,8 @@ async def register(payload: UserCreate):
             wrap_email("Welcome aboard", body, "Verify email", verify_url),
             meta={"type": "welcome"},
         )
-    except Exception:
+    except Exception as e:
+        logger.warning(f"Failed to send welcome email: {e}")
         pass
 
     stored = await db.users.find_one({"id": user.id})
@@ -154,12 +158,16 @@ async def forgot_password(payload: EmailRequest):
             "<p>We received a request to reset your SpikeBulls password. The link below expires in 1 hour.</p>"
             "<p>If you didn't request this, you can safely ignore this email.</p>"
         )
-        await send_email(
-            user["email"],
-            "Reset your SpikeBulls password",
-            wrap_email("Password reset", body, "Reset password", reset_url),
-            meta={"type": "password_reset"},
-        )
+        try:
+            await send_email(
+                user["email"],
+                "Reset your SpikeBulls password",
+                wrap_email("Password reset", body, "Reset password", reset_url),
+                meta={"type": "password_reset"},
+            )
+        except Exception as e:
+            logger.warning(f"Failed to send password reset email: {e}")
+            pass
     return {"ok": True, "message": "If that email exists, a reset link has been sent."}
 
 
