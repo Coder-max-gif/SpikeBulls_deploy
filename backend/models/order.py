@@ -67,4 +67,5 @@ class ManualPaymentSubmit(BaseModel):
     payment_proof_url: Optional[str] = None
     binance_transaction_id: Optional[str] = None
     payment_notes: Optional[str] = None
+    customer_phone: Optional[str] = None
 

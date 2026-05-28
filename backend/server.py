@@ -53,9 +53,11 @@ async def lifespan(app: FastAPI):
         STORAGE_DIR = Path(__file__).parent / "storage"
         PRODUCT_IMAGES_DIR = STORAGE_DIR / "product-images"
         PRODUCTS_DIR = STORAGE_DIR / "products"
+        PAYMENT_PROOFS_DIR = STORAGE_DIR / "payment_proofs"
         STORAGE_DIR.mkdir(parents=True, exist_ok=True)
         PRODUCT_IMAGES_DIR.mkdir(parents=True, exist_ok=True)
         PRODUCTS_DIR.mkdir(parents=True, exist_ok=True)
+        PAYMENT_PROOFS_DIR.mkdir(parents=True, exist_ok=True)
         logger.info("✓ Storage directories created")
         
         logger.info("[4/7] Setting up database indexes...")
@@ -139,6 +141,10 @@ app.include_router(admin_router, prefix="/api")
 app.include_router(downloads_router, prefix="/api")
 app.include_router(licenses_router, prefix="/api")
 app.include_router(payments_router, prefix="/api")
+
+# Mount static files for payment proofs
+from fastapi.staticfiles import StaticFiles
+app.mount("/storage/payment_proofs", StaticFiles(directory="storage/payment_proofs"), name="payment_proofs")
 
 
 # CORS

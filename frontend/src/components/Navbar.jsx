@@ -6,6 +6,8 @@ import { BRAND } from "../mock";
 import { useAuth } from "../context/AuthContext";
 
 const NAV_LINKS = [
+  { label: "Home", href: "/" },
+  { label: "Live", href: "/live" },
   { label: "Products", href: "/products" },
   { label: "Pricing", href: "/pricing" },
   { label: "FAQ", href: "/faq" },

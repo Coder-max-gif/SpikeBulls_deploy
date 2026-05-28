@@ -30,6 +30,7 @@ export default function ProductDetailPage() {
   const [buying, setBuying] = useState(false);
   const [buyError, setBuyError] = useState("");
   const [selectedTier, setSelectedTier] = useState(null);
+  const [agreeTerms, setAgreeTerms] = useState(false);
 
   const handleBuy = async (tierId = null) => {
     setBuyError("");
@@ -147,10 +148,24 @@ export default function ProductDetailPage() {
 
                   {buyError && <p className="mt-3 text-[13px] text-rose-600">{buyError}</p>}
 
+                  <div className="mt-6 flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      id="agreeTermsProduct"
+                      checked={agreeTerms}
+                      onChange={(e) => setAgreeTerms(e.target.checked)}
+                      className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                      required
+                    />
+                    <label htmlFor="agreeTermsProduct" className="text-[13px] text-slate-600 leading-relaxed">
+                      I agree to the <Link to="/terms" className="text-blue-600 hover:text-blue-700 font-medium">Terms and Conditions</Link>
+                    </label>
+                  </div>
+
                   <div className="mt-4 flex flex-wrap items-center gap-3">
                     <button 
                       onClick={() => handleBuy(selectedTier)} 
-                      disabled={buying || selectedTier === null} 
+                      disabled={buying || selectedTier === null || !agreeTerms} 
                       className="btn-primary" 
                       style={isViolet ? {
                         background: "linear-gradient(180deg, #8B5CF6 0%, #7C3AED 100%)",
@@ -177,8 +192,22 @@ export default function ProductDetailPage() {
 
                   {buyError && <p className="mt-3 text-[13px] text-rose-600">{buyError}</p>}
 
-                  <div className="mt-6 flex flex-wrap items-center gap-3">
-                    <button onClick={handleBuy} disabled={buying} className="btn-primary" style={isViolet ? {
+                  <div className="mt-6 flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      id="agreeTermsProduct2"
+                      checked={agreeTerms}
+                      onChange={(e) => setAgreeTerms(e.target.checked)}
+                      className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                      required
+                    />
+                    <label htmlFor="agreeTermsProduct2" className="text-[13px] text-slate-600 leading-relaxed">
+                      I agree to the <Link to="/terms" className="text-blue-600 hover:text-blue-700 font-medium">Terms and Conditions</Link>
+                    </label>
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap items-center gap-3">
+                    <button onClick={handleBuy} disabled={buying || !agreeTerms} className="btn-primary" style={isViolet ? {
                       background: "linear-gradient(180deg, #8B5CF6 0%, #7C3AED 100%)",
                       borderColor: "rgba(167,139,250,0.6)",
                       boxShadow: "0 8px 24px -8px rgba(139,92,246,0.55), inset 0 1px 0 rgba(255,255,255,0.25)",

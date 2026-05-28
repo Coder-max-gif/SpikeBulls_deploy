@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Radio, Settings2, Sparkles, Zap, Layers, Shield, Loader2 } from "lucide-react";
+import { ArrowRight, LineChart, Bot, CheckCircle, Shield, TrendingUp, Zap, Clock, Loader2 } from "lucide-react";
 import { useProducts } from "../lib/queries";
 import { SectionHeader } from "./ProductsOverview";
 import TiltCard from "./TiltCard";
@@ -11,16 +11,16 @@ export default function ProductPreview() {
   const navigate = useNavigate();
   const { products, loading } = useProducts();
 
-  const signals = products.find((p) => p.category === "signals");
-  const automation = products.find((p) => p.category === "automation");
+  const indicator = products.find((p) => p.category === "indicator");
+  const algo = products.find((p) => p.category === "algo");
 
   return (
-    <section className="relative py-24 sm:py-32">
+    <section id="products" className="relative py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-5">
         <SectionHeader
-          eyebrow="More than indicators"
-          title="Signals and automation that compound your edge"
-          subtitle="Daily institutional-style trade ideas and a complete MT5 automation toolkit — ready out of the box."
+          eyebrow="Professional MT5 tools"
+          title="Indicator and algorithm for serious traders"
+          subtitle="Professional non-repainting MT5 indicator and automated algo strategy — engineered for consistent, disciplined forex and gold trading."
         />
 
         {loading ? (
@@ -29,32 +29,32 @@ export default function ProductPreview() {
           </div>
         ) : (
           <div className="mt-14 grid lg:grid-cols-2 gap-5">
-            {signals && (
+            {indicator && (
               <ProductCard
-                product={signals}
+                product={indicator}
                 accent="blue"
-                Icon={Radio}
-                eyebrow="Forex Signals"
+                Icon={LineChart}
+                eyebrow="MT5 Indicator"
                 badges={[
-                  { Icon: Sparkles, label: "3–6 ideas / session" },
-                  { Icon: Zap, label: "Telegram" },
-                  { Icon: Shield, label: "Risk guidance" },
+                  { Icon: CheckCircle, label: "Non-Repainting" },
+                  { Icon: Shield, label: "Gold Optimized" },
+                  { Icon: TrendingUp, label: "MT5 Compatible" },
                 ]}
-                onClick={() => navigate(`/products/${signals.slug}`)}
+                onClick={() => navigate(`/products/${indicator.slug}`)}
               />
             )}
-            {automation && (
+            {algo && (
               <ProductCard
-                product={automation}
+                product={algo}
                 accent="violet"
-                Icon={Settings2}
-                eyebrow="Automation Suite"
+                Icon={Bot}
+                eyebrow="MT5 Algorithm"
                 badges={[
-                  { Icon: Layers, label: "Multi-account copier" },
-                  { Icon: Shield, label: "Risk caps" },
-                  { Icon: Zap, label: "Smart trailing" },
+                  { Icon: Zap, label: "Automated Execution" },
+                  { Icon: Shield, label: "Risk Logic" },
+                  { Icon: Clock, label: "VPS Friendly" },
                 ]}
-                onClick={() => navigate(`/products/${automation.slug}`)}
+                onClick={() => navigate(`/products/${algo.slug}`)}
               />
             )}
           </div>
@@ -138,7 +138,7 @@ function ProductCard({ product, accent, Icon, eyebrow, badges, onClick }) {
               : undefined
           }
         >
-          Explore {product.name}
+          Get Subscription
           <ArrowRight className="h-4 w-4" />
         </MagneticButton>
       </TiltCard>

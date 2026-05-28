@@ -34,7 +34,7 @@ export default function AdminOrders() {
   const handleActivate = async (orderId) => {
     try {
       setProcessing(prev => ({ ...prev, [orderId]: true }));
-      const res = await api.post(`/admin/orders/${orderId}/activate`);
+      const res = await api.post(`/payments/admin/orders/${orderId}/activate`);
       setOrders(orders.map(o => o.id === orderId ? res.data : o));
     } catch (err) {
       alert(err.response?.data?.detail || "Failed to activate order");
@@ -47,7 +47,7 @@ export default function AdminOrders() {
     if (!window.confirm("Are you sure you want to reject this order?")) return;
     try {
       setProcessing(prev => ({ ...prev, [orderId]: true }));
-      const res = await api.post(`/admin/orders/${orderId}/reject`);
+      const res = await api.post(`/payments/admin/orders/${orderId}/reject`);
       setOrders(orders.map(o => o.id === orderId ? res.data : o));
     } catch (err) {
       alert(err.response?.data?.detail || "Failed to reject order");
@@ -136,6 +136,11 @@ export default function AdminOrders() {
                     )}
                     {o.binance_transaction_id && (
                       <div className="text-[11px] text-slate-500 mt-1">TX: {o.binance_transaction_id}</div>
+                    )}
+                    {o.payment_proof_url && (
+                      <div className="text-[11px] text-blue-600 mt-1">
+                        <a href={o.payment_proof_url} target="_blank" rel="noreferrer">View Proof</a>
+                      </div>
                     )}
                   </td>
                   <td className="px-5 py-3 text-slate-600">{new Date(o.created_at).toLocaleDateString()}</td>

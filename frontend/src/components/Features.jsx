@@ -1,50 +1,59 @@
 import React from "react";
 import { motion } from "framer-motion";
-import * as Icons from "lucide-react";
-import { FEATURES } from "../mock";
+import { ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { SectionHeader } from "./ProductsOverview";
-import TiltCard from "./TiltCard";
 
 export default function Features() {
+  const navigate = useNavigate();
+
   return (
     <section id="features" className="relative py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-5">
         <SectionHeader
-          eyebrow="Why traders choose us"
-          title="Every edge, engineered in"
-          subtitle="From signal clarity to portfolio-level risk control — each feature is built to compound your advantage."
+          eyebrow="Live Preview"
+          title="Watch our strategies in real-time"
+          subtitle="Live streaming of our indicator and algorithm performance directly from our VPS."
         />
 
-        <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {FEATURES.map((f, i) => {
-            const Icon = Icons[f.icon] || Icons.Sparkles;
-            return (
-              <motion.div
-                key={f.title}
-                initial={{ opacity: 0, y: 18 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-60px" }}
-                transition={{ duration: 0.5, delay: i * 0.05 }}
-              >
-                <TiltCard className="group relative glass rounded-2xl p-6 overflow-hidden hover:border-slate-300 transition-all">
-                  {/* hover glow */}
-                  <div className="absolute -inset-px rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                    style={{
-                      background:
-                        "radial-gradient(400px circle at var(--x, 50%) var(--y, 0%), rgba(96,165,250,0.12), transparent 50%)",
-                    }}
-                  />
-                  <div className="h-11 w-11 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500/15 to-violet-500/15 border border-slate-200 text-blue-600">
-                    <Icon className="h-5 w-5" strokeWidth={1.75} />
-                  </div>
-                  <h3 className="mt-5 font-display text-[20px] text-slate-900 font-medium">
-                    {f.title}
-                  </h3>
-                  <p className="mt-2 text-[14px] text-slate-600 leading-relaxed">{f.desc}</p>
-                </TiltCard>
-              </motion.div>
-            );
-          })}
+        <div className="mt-14 grid lg:grid-cols-2 gap-5">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.6 }}
+            className="glass-strong rounded-2xl p-6"
+          >
+            <div className="text-[12px] text-slate-500 mb-2">Indicator</div>
+            <div className="font-display text-[22px] text-slate-900 font-semibold tracking-tight mb-4">Live Indicator Stream</div>
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 flex items-center justify-center">
+              <span className="text-slate-500 text-[14px]">[Live indicator preview]</span>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="glass-strong rounded-2xl p-6"
+          >
+            <div className="text-[12px] text-slate-500 mb-2">Algo</div>
+            <div className="font-display text-[22px] text-slate-900 font-semibold tracking-tight mb-4">Live Algo Stream</div>
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 flex items-center justify-center">
+              <span className="text-slate-500 text-[14px]">[Live algo preview]</span>
+            </div>
+          </motion.div>
+        </div>
+
+        <div className="mt-10 flex justify-center">
+          <button
+            onClick={() => navigate("/live")}
+            className="btn-primary !py-3 !px-7 !text-[15px] font-medium"
+          >
+            View Full Live Stream
+            <ArrowRight className="h-4 w-4" />
+          </button>
         </div>
       </div>
     </section>

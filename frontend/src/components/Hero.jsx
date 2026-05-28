@@ -2,7 +2,6 @@ import React, { useRef } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
-import AnimatedDashboard from "./AnimatedDashboard";
 import GlowCube from "./GlowCube";
 import FloatingOrb from "./FloatingOrb";
 import MagneticButton from "./MagneticButton";
@@ -77,54 +76,51 @@ export default function Hero() {
         >
           <span className="text-gradient">Institutional-grade</span>
           <br />
-          <span className="text-slate-900">trading tools for the </span>
+          <span className="text-slate-900">MT5 trading tools for the</span>
+          <br />
           <span className="text-gradient-accent">modern trader</span>
         </motion.h1>
 
         <motion.p
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2, type: "spring" }}
-          className="mt-6 text-center text-slate-600 text-[16px] sm:text-[18px] max-w-2xl mx-auto leading-relaxed"
+          transition={{ duration: 0.8, delay: 0.25, type: "spring" }}
+          className="mt-8 text-center text-slate-600 text-[16px] sm:text-[18px] max-w-2xl mx-auto leading-relaxed"
         >
-          A precision MT5 indicator suite and a fully automated algo strategy —
-          engineered for traders who refuse to leave money on the table.
+          Professional non-repainting MT5 indicator and automated algo strategy —
+          engineered for consistent, disciplined forex and gold trading.
         </motion.p>
 
         <motion.div
           initial={{ opacity: 0, y: 20, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.7, delay: 0.3, type: "spring" }}
+          transition={{ duration: 0.7, delay: 0.35, type: "spring" }}
           className="mt-8 flex flex-wrap items-center justify-center gap-4"
         >
           <MagneticButton onClick={() => navigate("/pricing")}>
-            Start Trading
+            Get Access
             <ArrowRight className="h-4 w-4" />
           </MagneticButton>
           <MagneticButton
             variant="ghost"
             onClick={() => {
-              const el = document.querySelector("#products");
+              const el = document.querySelector("#choose-your-edge");
               if (el) el.scrollIntoView({ behavior: "smooth" });
             }}
           >
-            See the products
+            Choose Subscription
           </MagneticButton>
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.35 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
           className="mt-5 flex items-center justify-center gap-2 text-[12px] text-slate-500"
         >
           <ShieldCheck className="h-3.5 w-3.5 text-emerald-400/80" />
           14-day demo license available · No card required
         </motion.div>
-
-        <div className="mt-16 sm:mt-20 max-w-5xl mx-auto">
-          <AnimatedDashboard />
-        </div>
       </div>
 
       {/* bottom fade */}

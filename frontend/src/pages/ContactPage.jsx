@@ -6,7 +6,7 @@ import { BRAND } from "../mock";
 import { api } from "../lib/api";
 
 export default function ContactPage() {
-  const [form, setForm] = useState({ name: "", email: "", topic: "general", message: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", topic: "general", message: "" });
   const [sent, setSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -74,6 +74,9 @@ export default function ContactPage() {
               <div className="mt-6 grid sm:grid-cols-2 gap-3">
                 <Field label="Name" value={form.name} onChange={(v) => setForm({ ...form, name: v })} placeholder="Your name" required />
                 <Field label="Email" type="email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} placeholder="you@example.com" required />
+              </div>
+              <div className="mt-3">
+                <Field label="Phone Number" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} placeholder="+1234567890" />
               </div>
 
               <div className="mt-3">

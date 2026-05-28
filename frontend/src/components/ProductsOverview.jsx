@@ -1,35 +1,26 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Check, LineChart, Bot, Radio, Settings2, Loader2 } from "lucide-react";
+import { ArrowRight, LineChart, Bot, CheckCircle, Shield, TrendingUp, Zap, Clock } from "lucide-react";
 import { useProducts } from "../lib/queries";
 import TiltCard from "./TiltCard";
 import MagneticButton from "./MagneticButton";
-
-const CATEGORY_ICONS = {
-  indicator: LineChart,
-  algo: Bot,
-  signals: Radio,
-  automation: Settings2,
-};
+import { Loader2 } from "lucide-react";
 
 export default function ProductsOverview() {
   const navigate = useNavigate();
   const { products, loading } = useProducts();
 
-  // Pick the two flagship products: one indicator + one algo (fallback to first 2)
   const indicator = products.find((p) => p.category === "indicator");
   const algo = products.find((p) => p.category === "algo");
-  const featured = [indicator, algo].filter(Boolean).slice(0, 2);
-  const display = featured.length === 2 ? featured : products.slice(0, 2);
 
   return (
     <section id="products" className="relative py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-5">
         <SectionHeader
-          eyebrow="Built for Serious Traders"
-          title="Four products. One unfair edge."
-          subtitle="Indicators, algos, signals, and automation tools — use them solo or stack them for full coverage."
+          eyebrow="Our Products"
+          title="Professional MT5 indicator and algorithm"
+          subtitle="Professional non-repainting MT5 indicator and automated algo strategy — engineered for consistent, disciplined forex and gold trading."
         />
 
         {loading ? (
@@ -38,85 +29,120 @@ export default function ProductsOverview() {
           </div>
         ) : (
           <div className="mt-14 grid lg:grid-cols-2 gap-5">
-            {display.map((p, idx) => {
-              const Icon = CATEGORY_ICONS[p.category] || LineChart;
-              const accent = p.accent === "violet" ? "violet" : "blue";
-              return (
-                <motion.div
-                  key={p.id}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-80px" }}
-                  transition={{ duration: 0.6, delay: idx * 0.08 }}
-                >
-                  <TiltCard className="group relative glass-strong rounded-2xl overflow-hidden">
-                    <div
-                      className={`pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full blur-3xl opacity-50 ${
-                        accent === "blue" ? "bg-blue-500/30" : "bg-violet-500/30"
-                      }`}
-                    />
-                    <div className="relative p-7 sm:p-9">
-                      <div className="flex items-center justify-between">
-                        <div
-                          className={`h-11 w-11 rounded-xl flex items-center justify-center border ${
-                            accent === "blue"
-                              ? "bg-blue-500/10 border-blue-400/30 text-blue-600"
-                              : "bg-violet-500/10 border-violet-400/30 text-violet-600"
-                          }`}
-                        >
-                          <Icon className="h-5 w-5" />
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {(p.platforms || []).slice(0, 3).map((pl) => (
-                            <span
-                              key={pl}
-                              className="text-[11px] text-slate-600 px-2 py-1 rounded-md bg-slate-100 border border-slate-200"
-                            >
-                              {pl}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-
-                      <h3 className="mt-6 font-display text-[28px] sm:text-[32px] text-slate-900 font-semibold tracking-tight">
-                        {p.name}
-                      </h3>
-                      <p className="mt-2 text-slate-600 text-[15px]">{p.short_description}</p>
-                      <p className="mt-4 text-slate-500 text-[14px] leading-relaxed line-clamp-3">{p.description}</p>
-
-                      <ul className="mt-6 grid sm:grid-cols-2 gap-x-4 gap-y-2.5">
-                        {(p.features || []).slice(0, 5).map((f) => (
-                          <li key={f} className="flex items-start gap-2 text-[13.5px] text-slate-700">
-                            <Check className={`h-4 w-4 mt-0.5 shrink-0 ${accent === "blue" ? "text-blue-400" : "text-violet-400"}`} />
-                            <span>{f}</span>
-                          </li>
-                        ))}
-                      </ul>
-
-                      <div className="mt-8 flex items-center gap-3">
-                        <MagneticButton onClick={() => navigate(`/products/${p.slug}`)} className="!py-2.5">
-                          Explore
-                          <ArrowRight className="h-4 w-4" />
-                        </MagneticButton>
-                        <MagneticButton variant="ghost" onClick={() => navigate("/pricing")} className="!py-2.5">
-                          ${p.price.toFixed(0)} · view pricing
-                        </MagneticButton>
-                      </div>
-                    </div>
-                  </TiltCard>
-                </motion.div>
-              );
-            })}
+            {indicator && (
+              <ProductCard
+                product={indicator}
+                accent="blue"
+                Icon={LineChart}
+                eyebrow="MT5 Indicator"
+                badges={[
+                  { Icon: CheckCircle, label: "Non-Repainting" },
+                  { Icon: Shield, label: "Gold Optimized" },
+                  { Icon: TrendingUp, label: "MT5 Compatible" },
+                ]}
+                onClick={() => navigate(`/products/${indicator.slug}`)}
+              />
+            )}
+            {algo && (
+              <ProductCard
+                product={algo}
+                accent="violet"
+                Icon={Bot}
+                eyebrow="MT5 Algorithm"
+                badges={[
+                  { Icon: Zap, label: "Automated Execution" },
+                  { Icon: Shield, label: "Risk Logic" },
+                  { Icon: Clock, label: "VPS Friendly" },
+                ]}
+                onClick={() => navigate(`/products/${algo.slug}`)}
+              />
+            )}
           </div>
         )}
-
-        <div className="mt-10 text-center">
-          <button onClick={() => navigate("/products")} className="btn-ghost">
-            See all products <ArrowRight className="h-4 w-4" />
-          </button>
-        </div>
       </div>
     </section>
+  );
+}
+
+function ProductCard({ product, accent, Icon, eyebrow, badges, onClick }) {
+  const isBlue = accent === "blue";
+  const image = product.images?.[0];
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.6 }}
+    >
+      <TiltCard className="glass-strong rounded-2xl p-6 relative overflow-hidden">
+        <div
+          className={`absolute -top-24 ${isBlue ? "-left-20" : "-right-20"} h-56 w-56 rounded-full blur-3xl pointer-events-none ${
+            isBlue ? "bg-blue-500/20" : "bg-violet-500/20"
+          }`}
+        />
+        <div className="flex items-center gap-3 mb-4">
+          <div
+            className={`h-10 w-10 rounded-lg border flex items-center justify-center ${
+              isBlue
+                ? "bg-blue-500/15 border-blue-400/30 text-blue-600"
+                : "bg-violet-500/15 border-violet-400/30 text-violet-600"
+            }`}
+          >
+            <Icon className="h-5 w-5" />
+          </div>
+          <div>
+            <div className="text-[11px] uppercase tracking-wider text-slate-500">{eyebrow}</div>
+            <h3 className="font-display text-[22px] text-slate-900 font-medium">{product.name}</h3>
+          </div>
+        </div>
+
+        <div className="relative rounded-xl overflow-hidden border border-slate-200 aspect-[16/10] bg-slate-50">
+          {image && (
+            <img
+              src={image}
+              alt={product.name}
+              className="absolute inset-0 w-full h-full object-cover opacity-50"
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#F8FAFC] via-white/40 to-transparent" />
+          <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
+            <span className="glass rounded-md px-2.5 py-1.5 text-[11px] text-slate-900">{eyebrow}</span>
+            <span className="glass rounded-md px-2.5 py-1.5 text-[11px] text-emerald-600">
+              ${product.price.toFixed(0)}
+            </span>
+          </div>
+        </div>
+
+        <p className="mt-4 text-[14px] text-slate-600 leading-relaxed">{product.short_description}</p>
+
+        <div className="mt-5 grid grid-cols-3 gap-2">
+          {badges.map((b, i) => (
+            <div key={i} className="glass rounded-lg p-3 flex items-center gap-2">
+              <b.Icon className={`h-4 w-4 ${isBlue ? "text-blue-600" : "text-violet-600"}`} />
+              <span className="text-[12px] text-slate-700">{b.label}</span>
+            </div>
+          ))}
+        </div>
+
+        <MagneticButton
+          onClick={onClick}
+          className="mt-6 !py-2.5"
+          variant={isBlue ? "primary" : "primary"}
+          style={
+            !isBlue
+              ? {
+                  background: "linear-gradient(180deg, #8B5CF6 0%, #7C3AED 100%)",
+                  borderColor: "rgba(167,139,250,0.6)",
+                  boxShadow: "0 8px 24px -8px rgba(139,92,246,0.55), inset 0 1px 0 rgba(255,255,255,0.25)",
+                }
+              : undefined
+          }
+        >
+          Activate Membership
+          <ArrowRight className="h-4 w-4" />
+        </MagneticButton>
+      </TiltCard>
+    </motion.div>
   );
 }
 

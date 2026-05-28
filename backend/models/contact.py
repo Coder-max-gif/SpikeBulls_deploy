@@ -11,6 +11,7 @@ ContactStatus = Literal["new", "in_progress", "closed"]
 class ContactCreate(BaseModel):
     name: str = Field(min_length=2, max_length=120)
     email: EmailStr
+    phone: str | None = None
     topic: ContactTopic = "general"
     message: str = Field(min_length=5, max_length=4000)
     source: str | None = None

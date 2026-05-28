@@ -15,6 +15,7 @@ import FAQPage from "./pages/FAQPage";
 import ContactPage from "./pages/ContactPage";
 import AboutPage from "./pages/AboutPage";
 import PerformancePage from "./pages/PerformancePage";
+import LivePage from "./pages/LivePage";
 import PressPage from "./pages/PressPage";
 import DocumentationPage from "./pages/DocumentationPage";
 import SetupGuidePage from "./pages/SetupGuidePage";
@@ -58,6 +59,7 @@ function App() {
             <Route path="/faq" element={<FAQPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/live" element={<LivePage />} />
             <Route path="/performance" element={<PerformancePage />} />
             <Route path="/press" element={<PressPage />} />
             <Route path="/documentation" element={<DocumentationPage />} />

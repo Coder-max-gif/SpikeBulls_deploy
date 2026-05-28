@@ -39,19 +39,23 @@ export const TRUST_STATS = [
 export const MOCK_PRODUCTS = [
   {
     id: "indicator-subscription",
-    name: "SpikeBulls Indicator — Subscription",
+    name: "SpikeBulls Indicator Subscription",
     slug: "indicator-subscription",
     category: "indicator",
-    short_description: "Indicator access with flexible monthly/annual plans.",
-    description: "A multi-layer technical indicator suite for MetaTrader 5. Real-time trend detection, smart money concepts, liquidity zones, and volatility-aware entry levels — all on one clean overlay.",
+    short_description: "Professional non-repainting MT5 indicator subscription for forex and gold traders.",
+    description: "SpikeBulls Indicator Subscription provides access to our advanced MT5 trading indicator system built around structured market behavior, trend confirmation, and non-repainting signal logic. The indicator is designed for traders who want cleaner entries, disciplined execution, and reliable chart-based analysis for Forex and XAUUSD trading. Built using advanced TMA-based logic, the indicator focuses on: signal confirmation, trend direction, alternating signal filtering, non-repainting execution, and structured market entries.",
     price: 29.0,
     features: [
-      "Multi-timeframe trend engine",
-      "Liquidity & order-block detection",
-      "Volatility-adjusted entry zones",
-      "Built-in risk calculator",
-      "Push, email & terminal alerts",
-      "Regular updates",
+      "MT5 Compatible",
+      "Non-Repainting Signal System",
+      "Buy & Sell Confirmation Signals",
+      "Strong + Confirmation Signals",
+      "Multi-Timeframe Compatible",
+      "Gold (XAUUSD) Optimized",
+      "Structured Entry Detection",
+      "Clean Chart Interface",
+      "Continuous Updates",
+      "Manual Activation Support"
     ],
     platforms: ["MetaTrader 5", "Windows", "VPS"],
     images: [
@@ -74,7 +78,7 @@ export const MOCK_PRODUCTS = [
       },
       {
         name: "1 Year",
-        price: 99.0,
+        price: 299.0,
         compare_at_price: 348.0,
         license_duration_days: 365,
       },
@@ -85,19 +89,24 @@ export const MOCK_PRODUCTS = [
   },
   {
     id: "algorithm-subscription",
-    name: "SpikeBulls Algorithm — Subscription",
+    name: "SpikeBulls Algorithm Subscription",
     slug: "algorithm-subscription",
     category: "algo",
-    short_description: "Automated strategy with flexible subscription plans.",
-    description: "An institutional-grade algorithmic strategy engineered for consistent risk-adjusted returns. Trades 24/5 across FX, indices, and metals with adaptive position sizing and drawdown control.",
+    short_description: "Advanced MT5 automation subscription powered by structured non-repainting signal logic.",
+    description: "SpikeBulls Algorithm Subscription gives traders access to our automated MTS execution system built around the SpikeBulls Indicator framework. The algorithm uses structured signal processing, trend confirmation, alternating signal control, and disciplined execution rules to support automated trading workflows.",
     price: 79.0,
     features: [
-      "Adaptive position sizing",
-      "Drawdown-controlled execution",
-      "Multi-asset portfolio engine",
-      "News-aware trading filter",
-      "One-click VPS deployment",
-      "Regular updates",
+      "MT5 Expert Advisor System",
+      "Automated Trade Execution",
+      "Non-Repainting Signal Logic",
+      "One-Trade Protection System",
+      "Opposite Signal Exit Logic",
+      "VPS Friendly",
+      "Gold & Forex Compatible",
+      "Structured Risk Logic",
+      "Automated Signal Handling",
+      "Continuous Updates",
+      "Subscription-Based Access"
     ],
     platforms: ["MetaTrader 5", "VPS", "Cloud"],
     images: [
@@ -184,17 +193,17 @@ export const HOW_IT_WORKS = [
   {
     step: "01",
     title: "Choose Your Product",
-    desc: "Pick the MT5 Indicator for manual precision, the Algo Strategy for full automation, or bundle both for complete coverage."
+    desc: "Pick the MT5 Indicator Subscription for manual precision, or the Algorithm Subscription for full automation."
   },
   {
     step: "02",
-    title: "One-Click Setup",
-    desc: "Receive your license, install via our guided setup, and connect to your MT5 terminal or VPS in under 5 minutes."
+    title: "Complete Payment",
+    desc: "Send payment via Binance to the provided address, then click 'I Have Paid' on the checkout page. Our team will verify your payment manually."
   },
   {
     step: "03",
-    title: "Start Trading",
-    desc: "Get live signals on your charts or let the algorithm execute autonomously. Monitor performance from any device."
+    title: "Activate & Install",
+    desc: "Receive your license key via email, install the product on your MT5 terminal, and start trading with your chosen subscription."
   }
 ];
 
@@ -232,16 +241,16 @@ export const TESTIMONIALS = [
 export const PRICING_PLANS = [
   {
     id: "indicator-subscription",
-    name: "Indicator",
+    name: "Indicator Subscription",
     price: 29,
     period: "monthly",
-    description: "Indicator access with flexible monthly/annual plans.",
+    description: "Professional non-repainting MT5 indicator subscription for forex and gold traders.",
     features: [
-      "Multi-timeframe trend engine",
-      "Liquidity & order-block detection",
-      "Volatility-adjusted entry zones",
-      "Built-in risk calculator",
-      "Push, email & terminal alerts"
+      "MT5 Compatible",
+      "Non-Repainting Signal System",
+      "Buy & Sell Confirmation Signals",
+      "Gold (XAUUSD) Optimized",
+      "Manual Activation Support"
     ],
     cta: "Get Indicator",
     highlight: false,
@@ -249,16 +258,16 @@ export const PRICING_PLANS = [
   },
   {
     id: "algorithm-subscription",
-    name: "Algorithm",
+    name: "Algorithm Subscription",
     price: 79,
     period: "monthly",
-    description: "Automated strategy with flexible subscription plans.",
+    description: "Advanced MT5 automation subscription powered by structured non-repainting signal logic.",
     features: [
-      "Adaptive position sizing",
-      "Drawdown-controlled execution",
-      "Multi-asset portfolio engine",
-      "News-aware trading filter",
-      "One-click VPS deployment"
+      "MT5 Expert Advisor System",
+      "Automated Trade Execution",
+      "VPS Friendly",
+      "Gold & Forex Compatible",
+      "Subscription-Based Access"
     ],
     cta: "Get Algorithm",
     highlight: true,
@@ -269,32 +278,32 @@ export const PRICING_PLANS = [
 
 export const FAQS = [
   {
+    q: "How does manual Binance payment work?",
+    a: "After selecting a product, you'll receive our Binance payment details. Send the exact amount to the provided address. Once you've sent payment, click 'I Have Paid' on the checkout page. Our team will verify your payment manually, and your license will be activated and delivered via email."
+  },
+  {
+    q: "How long does activation take?",
+    a: "Payment verification and license activation are done manually. We aim to process all verifications within 24 hours, but typically much faster. You'll receive an email with your license details as soon as your payment is confirmed."
+  },
+  {
     q: "Do your products repaint?",
     a: "No. Every signal generated by the MT5 Indicator is locked once a candle closes. The Algo Strategy executes only on confirmed conditions — no future-leaking, no repainting."
   },
   {
     q: "What markets and timeframes are supported?",
-    a: "FX majors and minors, gold, silver, oil, and major indices (US30, NAS100, SPX500, DAX, etC). Timeframes from M5 to D1 are fully supported. M1 is available but not recommended."
+    a: "FX majors and minors, and gold (XAUUSD) are optimized. Timeframes from M5 to D1 are fully supported. M1 is available but not recommended."
   },
   {
-    q: "Do I need a VPS to run the Algo Strategy?",
-    a: "Strongly recommended. A VPS keeps your MT5 terminal online 24/5 with stable latency. We provide step-by-step setup for popular VPS providers in the bundle."
+    q: "Do I need a VPS to run the products?",
+    a: "For the Algo Subscription, a VPS is strongly recommended to keep your MT5 terminal online 24/5 with stable latency. For the Indicator Subscription, a VPS is optional but useful if you want to run MT5 continuously."
   },
   {
-    q: "Is there a free trial?",
-    a: "We offer a 14-day demo license on request so you can run both products on a demo MT5 account before purchasing. Contact support to enable it."
-  },
-  {
-    q: "How do updates work?",
-    a: "All purchases include lifetime updates. New versions are pushed automatically through our license portal — no reinstall, no extra fees."
-  },
-  {
-    q: "What broker do I need?",
-    a: "Any MT5 broker works. For best execution we recommend ECN brokers with sub-100ms latency to a major liquidity hub (London, NY, Frankfurt)."
+    q: "Will the products work on MT5 and VPS?",
+    a: "Yes. Both the Indicator Subscription and Algorithm Subscription are fully compatible with MetaTrader 5 (MT5) and can be run on a VPS for 24/7 operation."
   },
   {
     q: "Is this financial advice?",
-    a: "No. Our products are technology tools. All trading carries risk, past performance does not guarantee future results, and you are responsible for your own decisions."
+    a: "No. Our products are educational and technical tools only. We do not provide financial advice, investment recommendations, or trading signals as a service. All trading carries risk, past performance does not guarantee future results, and you are solely responsible for your own decisions."
   }
 ];
 

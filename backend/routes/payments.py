@@ -1,19 +1,25 @@
-from datetime import datetime, timezone
+import uuid
+from datetime import datetime, timezone, timedelta
+from pathlib import Path
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from core.config import settings
 from core.database import get_db
-from core.deps import get_current_user
+from core.deps import get_current_user, get_current_admin
 from core.email import send_email, wrap_email
 from models.license import License
-from models.order import CheckoutCreate, Order, OrderItem
+from models.order import CheckoutCreate, Order, OrderItem, ManualPaymentSubmit
 from services import binance_service
 from services.seed import generate_license_key
 
 router = APIRouter(prefix="/payments", tags=["payments"])
+
+STORAGE_DIR = Path(__file__).parent.parent / "storage" / "payment_proofs"
+STORAGE_DIR.mkdir(parents=True, exist_ok=True)
 
 
 async def _build_order(user: dict, product_ids: list[str]) -> tuple[Order, list[dict]]:
@@ -41,10 +47,17 @@ async def _grant_licenses(order: Order, products: list[dict]) -> list[str]:
     db = get_db()
     license_ids: list[str] = []
     for prod in products:
-        duration = prod.get("license_duration_days")
-        expires_at = None
-        if duration:
-            expires_at = datetime.now(timezone.utc) + timezone.timedelta(days=int(duration))
+        duration = prod.get("subscription_tiers")
+        if duration and len(duration) > 0:
+            # Assume first tier or use subscription_duration from order
+            if order.subscription_duration:
+                tier_duration = order.subscription_duration
+            else:
+                tier_duration = duration[0].get("license_duration_days", 30)
+        else:
+            tier_duration = 30
+
+        expires_at = datetime.now(timezone.utc) + timedelta(days=int(tier_duration))
         lic = License(
             key=generate_license_key(),
             user_id=order.user_id,
@@ -81,6 +94,57 @@ async def _send_purchase_email(order: Order, products: list[dict], license_ids: 
         )
     except Exception:
         pass
+
+
+@router.post("/upload")
+async def upload_payment_proof(
+    file: UploadFile = File(...),
+    user=Depends(get_current_user),
+):
+    db = get_db()
+    file_extension = file.filename.split(".")[-1].lower()
+    allowed_extensions = {"jpg", "jpeg", "png", "pdf", "webp"}
+    if file_extension not in allowed_extensions:
+        raise HTTPException(status_code=400, detail="Invalid file type")
+    
+    file_id = str(uuid.uuid4())
+    file_name = f"{file_id}.{file_extension}"
+    file_path = STORAGE_DIR / file_name
+    
+    with open(file_path, "wb") as buffer:
+        buffer.write(await file.read())
+    
+    return {"url": f"/storage/payment_proofs/{file_name}"}
+
+
+@router.post("/binance/submit-payment")
+async def submit_binance_payment(
+    payload: ManualPaymentSubmit,
+    user=Depends(get_current_user),
+):
+    db = get_db()
+    order = await db.orders.find_one({"id": payload.order_id})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    if order["user_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="Not your order")
+    if order["status"] not in ["pending"]:
+        raise HTTPException(status_code=400, detail="Only pending orders can submit payment proof")
+    
+    updates = {"updated_at": datetime.now(timezone.utc)}
+    if payload.payment_proof_url:
+        updates["payment_proof_url"] = payload.payment_proof_url
+    if payload.binance_transaction_id:
+        updates["binance_transaction_id"] = payload.binance_transaction_id
+    if payload.payment_notes:
+        updates["payment_notes"] = payload.payment_notes
+    if payload.customer_phone:
+        updates["customer_phone"] = payload.customer_phone
+    
+    await db.orders.update_one({"id": payload.order_id}, {"$set": updates})
+    updated_order = await db.orders.find_one({"id": payload.order_id})
+    updated_order.pop("_id", None)
+    return updated_order
 
 
 @router.post("/binance/create-order")
@@ -169,3 +233,83 @@ async def get_binance_order(
     
     order.pop("_id", None)
     return {"order": order}
+
+
+@router.post("/admin/orders/{order_id}/activate", dependencies=[Depends(get_current_admin)])
+async def admin_activate_order(
+    order_id: str,
+):
+    db = get_db()
+    order = await db.orders.find_one({"id": order_id})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    products = []
+    for item in order["items"]:
+        p = await db.products.find_one({"id": item["product_id"]})
+        if p:
+            products.append(p)
+    
+    order_obj = Order(**{k: v for k, v in order.items() if k != "_id"})
+    license_ids = await _grant_licenses(order_obj, products)
+    
+    # Calculate subscription duration
+    subscription_duration = None
+    if order.get("subscription_duration"):
+        subscription_duration = order["subscription_duration"]
+    else:
+        for prod in products:
+            if prod.get("subscription_tiers"):
+                subscription_duration = prod["subscription_tiers"][0].get("license_duration_days", 30)
+                break
+    if not subscription_duration:
+        subscription_duration = 30
+    
+    expires_at = datetime.now(timezone.utc) + timedelta(days=int(subscription_duration))
+    await db.orders.update_one(
+        {"id": order_id},
+        {
+            "$set": {
+                "status": "active",
+                "license_ids": license_ids,
+                "activated_at": datetime.now(timezone.utc),
+                "subscription_expires_at": expires_at,
+                "updated_at": datetime.now(timezone.utc),
+            }
+        }
+    )
+    
+    order_obj.license_ids = license_ids
+    order_obj.status = "active"
+    order_obj.activated_at = datetime.now(timezone.utc)
+    order_obj.subscription_expires_at = expires_at
+    
+    await _send_purchase_email(order_obj, products, license_ids)
+    
+    updated_order = await db.orders.find_one({"id": order_id})
+    updated_order.pop("_id", None)
+    return updated_order
+
+
+@router.post("/admin/orders/{order_id}/reject", dependencies=[Depends(get_current_admin)])
+async def admin_reject_order(
+    order_id: str,
+):
+    db = get_db()
+    order = await db.orders.find_one({"id": order_id})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    await db.orders.update_one(
+        {"id": order_id},
+        {
+            "$set": {
+                "status": "rejected",
+                "updated_at": datetime.now(timezone.utc),
+            }
+        }
+    )
+    
+    updated_order = await db.orders.find_one({"id": order_id})
+    updated_order.pop("_id", None)
+    return updated_order

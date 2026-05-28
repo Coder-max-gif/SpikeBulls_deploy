@@ -1,26 +1,13 @@
 import React, { useMemo } from "react";
 import { motion } from "framer-motion";
-import { ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, ArrowRight } from "lucide-react";
 import { PERFORMANCE_METRICS, EQUITY_CURVE } from "../mock";
 import { SectionHeader } from "./ProductsOverview";
 import AnimatedNumber from "./AnimatedNumber";
+import { useNavigate } from "react-router-dom";
 
 export default function Performance() {
-  const curve = useMemo(() => {
-    const max = Math.max(...EQUITY_CURVE);
-    const min = Math.min(...EQUITY_CURVE);
-    const w = 600, h = 220, pad = 8;
-    const points = EQUITY_CURVE.map((v, i) => {
-      const x = pad + (i * (w - pad * 2)) / (EQUITY_CURVE.length - 1);
-      const y = h - pad - ((v - min) / (max - min || 1)) * (h - pad * 2);
-      return [x, y];
-    });
-    const line = points
-      .map((p, i) => (i === 0 ? `M ${p[0]} ${p[1]}` : `L ${p[0]} ${p[1]}`))
-      .join(" ");
-    const area = `${line} L ${w - pad} ${h - pad} L ${pad} ${h - pad} Z`;
-    return { line, area, w, h };
-  }, []);
+  const navigate = useNavigate();
 
   return (
     <section id="performance" className="relative py-24 sm:py-32">
@@ -28,122 +15,48 @@ export default function Performance() {
         <SectionHeader
           eyebrow="Performance"
           title="Numbers that hold up under audit"
-          subtitle="Twelve months of live, forward-tested execution across the Algo Strategy portfolio. Past performance is not a guarantee of future results."
+          subtitle="Live streaming of our indicator and algorithm performance directly from our VPS. Past performance is not a guarantee of future results."
         />
 
-        <div className="mt-14 grid lg:grid-cols-5 gap-5">
-          {/* chart card */}
+        {/* Live Streaming Sections */}
+        <div className="mt-14 grid lg:grid-cols-2 gap-5 mb-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.6 }}
-            className="lg:col-span-3 glass-strong rounded-2xl p-6 relative overflow-hidden"
+            className="glass-strong rounded-2xl p-6"
           >
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <div className="text-[12px] text-slate-500">Equity Curve · 12M</div>
-                <div className="flex items-baseline gap-3 mt-1">
-                  <div className="font-display text-[34px] text-slate-900 font-semibold tracking-tight">
-                    <AnimatedNumber value="+184.2%" />
-                  </div>
-                  <span className="text-emerald-400 text-[13px] flex items-center gap-1">
-                    <ArrowUpRight className="h-3 w-3" /> net
-                  </span>
-                </div>
-              </div>
-              <div className="flex gap-1">
-                {["1M", "3M", "6M", "1Y", "All"].map((t) => (
-                  <span
-                    key={t}
-                    className={`text-[11px] px-2 py-1 rounded-md border ${
-                      t === "1Y"
-                        ? "bg-slate-200 border-slate-200 text-slate-900"
-                        : "border-transparent text-slate-500"
-                    }`}
-                  >
-                    {t}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="relative rounded-xl bg-slate-50 border border-slate-200 p-4 overflow-hidden">
-              <div className="absolute inset-0 grid-overlay opacity-50" />
-              <svg viewBox={`0 0 ${curve.w} ${curve.h}`} className="relative w-full h-[220px]">
-                <defs>
-                  <linearGradient id="perfLine" x1="0" x2="1">
-                    <stop offset="0%" stopColor="#60A5FA" />
-                    <stop offset="100%" stopColor="#A78BFA" />
-                  </linearGradient>
-                  <linearGradient id="perfArea" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0%" stopColor="#60A5FA" stopOpacity="0.30" />
-                    <stop offset="100%" stopColor="#60A5FA" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
-                {[0, 1, 2, 3].map((i) => (
-                  <line
-                    key={i}
-                    x1="0"
-                    x2={curve.w}
-                    y1={40 + i * 50}
-                    y2={40 + i * 50}
-                    stroke="rgba(15,23,42,0.07)"
-                    strokeDasharray="3 4"
-                  />
-                ))}
-                <motion.path
-                  d={curve.area}
-                  fill="url(#perfArea)"
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 1 }}
-                />
-                <motion.path
-                  d={curve.line}
-                  fill="none"
-                  stroke="url(#perfLine)"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  initial={{ pathLength: 0 }}
-                  whileInView={{ pathLength: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 2, ease: "easeOut" }}
-                />
-              </svg>
+            <div className="text-[12px] text-slate-500 mb-2">Indicator</div>
+            <div className="font-display text-[22px] text-slate-900 font-semibold tracking-tight mb-4">Live Indicator Stream</div>
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 flex items-center justify-center">
+              <span className="text-slate-500 text-[14px]">[Live indicator stream from VPS will appear here]</span>
             </div>
           </motion.div>
 
-          {/* metrics */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="lg:col-span-2 grid grid-cols-2 sm:grid-cols-2 gap-3"
+            className="glass-strong rounded-2xl p-6"
           >
-            {PERFORMANCE_METRICS.map((m) => (
-              <div key={m.label} className="glass rounded-2xl p-5">
-                <div className="text-[12px] text-slate-500">{m.label}</div>
-                <div className="mt-1 font-display text-[26px] text-slate-900 font-semibold tracking-tight">
-                  <AnimatedNumber value={m.value} />
-                </div>
-                <div
-                  className={`text-[11px] mt-1 flex items-center gap-1 ${
-                    m.trend === "up" ? "text-emerald-400" : "text-rose-600"
-                  }`}
-                >
-                  {m.trend === "up" ? (
-                    <ArrowUpRight className="h-3 w-3" />
-                  ) : (
-                    <ArrowDownRight className="h-3 w-3" />
-                  )}
-                  vs. benchmark
-                </div>
-              </div>
-            ))}
+            <div className="text-[12px] text-slate-500 mb-2">Algo</div>
+            <div className="font-display text-[22px] text-slate-900 font-semibold tracking-tight mb-4">Live Algo Stream</div>
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 flex items-center justify-center">
+              <span className="text-slate-500 text-[14px]">[Live algo stream from VPS will appear here]</span>
+            </div>
           </motion.div>
+        </div>
+
+        <div className="mt-4 flex justify-center mb-16">
+          <button
+            onClick={() => navigate("/live")}
+            className="btn-primary !py-3 !px-7 !text-[15px] font-medium"
+          >
+            View Full Live Stream
+            <ArrowRight className="h-4 w-4" />
+          </button>
         </div>
 
         <p className="mt-10 text-center text-[12px] text-slate-500 max-w-2xl mx-auto">

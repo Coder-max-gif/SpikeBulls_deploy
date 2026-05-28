@@ -45,6 +45,7 @@ async def submit_contact(
         f"<p><strong>New contact submission received!</strong></p>"
         f"<p><strong>Name:</strong> {submission.name}</p>"
         f"<p><strong>Email:</strong> {submission.email}</p>"
+        f"<p><strong>Phone:</strong> {submission.phone or 'Not provided'}</p>"
         f"<p><strong>Topic:</strong> {submission.topic}</p>"
         f"<p><strong>Message:</strong></p>"
         f"<p>{submission.message}</p>"

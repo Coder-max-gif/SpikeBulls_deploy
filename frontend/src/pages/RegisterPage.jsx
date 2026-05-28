@@ -8,6 +8,7 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [agreeTerms, setAgreeTerms] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
@@ -17,6 +18,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setError("");
     if (password.length < 8) return setError("Password must be at least 8 characters.");
+    if (!agreeTerms) return setError("You must agree to the Terms and Conditions.");
     setLoading(true);
     try {
       await register({ name: name.trim(), email: email.trim(), password });
@@ -35,6 +37,21 @@ export default function RegisterPage() {
         <Field icon={User} label="Full name" value={name} onChange={setName} placeholder="Your name" required autoComplete="name" />
         <Field icon={Mail} label="Email" type="email" value={email} onChange={setEmail} placeholder="you@example.com" required autoComplete="email" />
         <Field icon={Lock} label="Password" type="password" value={password} onChange={setPassword} placeholder="At least 8 characters" required autoComplete="new-password" />
+        
+        <div className="flex items-start gap-3">
+          <input
+            type="checkbox"
+            id="agreeTerms"
+            checked={agreeTerms}
+            onChange={(e) => setAgreeTerms(e.target.checked)}
+            className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+            required
+          />
+          <label htmlFor="agreeTerms" className="text-[13px] text-slate-600 leading-relaxed">
+            I agree to the <Link to="/terms" className="text-blue-600 hover:text-blue-700 font-medium">Terms and Conditions</Link>
+          </label>
+        </div>
+        
         <button type="submit" disabled={loading} className="btn-primary w-full">
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Create account <ArrowRight className="h-4 w-4" /></>}
         </button>

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { CheckCircle2, ArrowRight, Loader2, Copy, Key, Receipt } from "lucide-react";
+import { CheckCircle2, ArrowRight, Loader2, Copy, Key, Receipt, Upload, Phone, Hash } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { api } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 
@@ -14,6 +15,11 @@ export default function CheckoutSuccessPage() {
   const [loading, setLoading] = useState(true);
   const [copiedKey, setCopiedKey] = useState("");
   const [paymentInfo, setPaymentInfo] = useState(null);
+  const [phone, setPhone] = useState("");
+  const [transactionHash, setTransactionHash] = useState("");
+  const [paymentProofFile, setPaymentProofFile] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
     if (!orderId || !isAuthenticated) {
@@ -38,6 +44,36 @@ export default function CheckoutSuccessPage() {
     setTimeout(() => setCopiedKey(""), 1500);
   };
 
+  const handleSubmitPayment = async () => {
+    setSubmitting(true);
+    try {
+      let paymentProofUrl = null;
+      if (paymentProofFile) {
+        const formData = new FormData();
+        formData.append("file", paymentProofFile);
+        const uploadRes = await api.post("/payments/upload", formData, {
+          headers: { "Content-Type": "multipart/form-data" }
+        });
+        paymentProofUrl = uploadRes.data.url;
+      }
+
+      await api.post("/payments/binance/submit-payment", {
+        order_id: orderId,
+        payment_proof_url: paymentProofUrl,
+        binance_transaction_id: transactionHash,
+        customer_phone: phone
+      });
+      setSubmitted(true);
+      
+      const orderRes = await api.get(`/checkout/orders/${orderId}`);
+      setData(orderRes.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <main className="bg-app min-h-screen">
       <section className="relative pt-32 pb-20 sm:pt-40">
@@ -49,7 +85,7 @@ export default function CheckoutSuccessPage() {
             </div>
             <h1 className="mt-6 font-display text-[40px] sm:text-[52px] text-slate-900 font-semibold tracking-tight">Order confirmed!</h1>
             <p className="mt-3 text-slate-600 text-[15.5px]">
-              Thanks for your purchase! We will send you the product files and instructions via email within 24 hours.
+              Thanks for your purchase! Complete payment below to get your product within 24 hours.
               {simulated && (
                 <span className="block mt-2 text-amber-600 text-[13px]">
                   (Simulated checkout — enable Stripe in backend/.env for live payments.)
@@ -57,28 +93,131 @@ export default function CheckoutSuccessPage() {
               )}
             </p>
 
-            {(data?.order?.status === "pending" || paymentInfo) && (
+            {submitted && (
+              <div className="mt-6 glass-strong rounded-2xl p-6 text-left border-2 border-emerald-400/30">
+                <div className="flex items-center gap-3">
+                  <CheckCircle2 className="h-6 w-6 text-emerald-500 flex-shrink-0" />
+                  <div className="text-left">
+                    <h3 className="font-display text-[18px] text-slate-900 font-medium">Payment request submitted!</h3>
+                    <p className="text-slate-600 text-[14px]">Waiting for admin verification. We'll email you when your order is active!</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {(data?.order?.status === "pending" || paymentInfo) && !submitted && (
               <div className="mt-8 glass-strong rounded-2xl p-6 text-left border-2 border-amber-400/30">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="font-display text-[18px] text-slate-900 font-medium">📱 Complete Payment via Trust Wallet</h2>
+                  <h2 className="font-display text-[18px] text-slate-900 font-medium">📱 Pay USDT using Trust Wallet</h2>
                 </div>
-                <div className="space-y-4 text-[14px] text-slate-700">
-                  <p><strong>1.</strong> Open your Trust Wallet app</p>
-                  <p><strong>2.</strong> Send USDT to this address:</p>
-                  <div className="bg-slate-100 p-4 rounded-lg font-mono text-[12px] break-all border border-slate-200 flex items-center gap-3">
-                    <span className="flex-1">{paymentInfo?.binance_address || "Your Binance USDT address will be here"}</span>
+                
+                <div className="grid md:grid-cols-2 gap-6 mb-6">
+                  {/* QR Code Section */}
+                  <div className="flex flex-col items-center justify-center">
+                    <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                      {paymentInfo?.binance_address ? (
+                        <QRCodeSVG
+                          value={paymentInfo.binance_address}
+                          size={200}
+                          level="H"
+                          includeMargin={true}
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center h-[200px] w-[200px] bg-slate-100 rounded-lg border border-slate-200">
+                          <span className="text-slate-500 text-[13px]">QR code will appear here</span>
+                        </div>
+                      )}
+                    </div>
+                    <p className="mt-3 text-[13px] text-slate-600 text-center">Scan with Trust Wallet</p>
+                    {paymentInfo?.binance_address && (
+                      <div className="mt-2">
+                        <p className="text-[11px] text-slate-500 uppercase tracking-wider mb-1">Network</p>
+                        <p className="text-[13px] text-slate-700 font-medium">TRC20 / BEP20 / ERC20</p>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Payment Instructions */}
+                  <div className="space-y-4 text-[14px] text-slate-700">
+                    <p><strong>1.</strong> Open your Trust Wallet app</p>
+                    <p><strong>2.</strong> Send <span className="font-bold">${data?.order?.total.toFixed(2)}</span> USDT to this address:</p>
+                    <div className="bg-slate-100 p-4 rounded-lg font-mono text-[12px] break-all border border-slate-200 flex items-center gap-3">
+                      <span className="flex-1">{paymentInfo?.binance_address || "Your Binance USDT address will be here"}</span>
+                      <button
+                        onClick={() => copy(paymentInfo?.binance_address || "")}
+                        className="shrink-0 text-blue-600 hover:text-blue-700 text-[12px] font-medium"
+                      >
+                        {copiedKey === paymentInfo?.binance_address ? "Copied!" : "Copy"}
+                      </button>
+                    </div>
+                    <p><strong>3.</strong> After sending payment, click "I Have Paid" below</p>
+                    <p><strong>4.</strong> Your request will appear in admin dashboard for manual review</p>
+                    <p><strong>5.</strong> Keep your transaction hash ready for verification</p>
+                  </div>
+                </div>
+
+                {/* Payment Form */}
+                <div className="border-t border-slate-200 pt-6">
+                  <h3 className="font-display text-[16px] text-slate-900 font-medium mb-4">Submit Payment Details</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-[13px] text-slate-700 font-medium mb-1.5 flex items-center gap-1.5">
+                        <Phone className="h-3.5 w-3.5 text-slate-500" />
+                        Phone Number
+                      </label>
+                      <input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="+1 234 567 8900"
+                        className="w-full px-3.5 py-2.5 rounded-lg bg-white border border-slate-200 text-[14px] text-slate-900 focus:outline-none focus:border-blue-400/60"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="text-[13px] text-slate-700 font-medium mb-1.5 flex items-center gap-1.5">
+                        <Hash className="h-3.5 w-3.5 text-slate-500" />
+                        Transaction Hash (recommended)
+                      </label>
+                      <input
+                        type="text"
+                        value={transactionHash}
+                        onChange={(e) => setTransactionHash(e.target.value)}
+                        placeholder="0x..."
+                        className="w-full px-3.5 py-2.5 rounded-lg bg-white border border-slate-200 text-[14px] text-slate-900 focus:outline-none focus:border-blue-400/60 font-mono"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[13px] text-slate-700 font-medium mb-1.5 flex items-center gap-1.5">
+                        <Upload className="h-3.5 w-3.5 text-slate-500" />
+                        Payment Screenshot (optional)
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => setPaymentProofFile(e.target.files?.[0] || null)}
+                          className="text-[13px] text-slate-700 file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                        />
+                        {paymentProofFile && (
+                          <span className="text-[12px] text-emerald-600 font-medium">Selected</span>
+                        )}
+                      </div>
+                    </div>
+
                     <button
-                      onClick={() => copy(paymentInfo?.binance_address || "")}
-                      className="shrink-0 text-blue-600 hover:text-blue-700 text-[12px] font-medium"
+                      onClick={handleSubmitPayment}
+                      disabled={submitting}
+                      className="btn-primary w-full justify-center"
                     >
-                      {copiedKey === paymentInfo?.binance_address ? "Copied!" : "Copy"}
+                      {submitting ? (
+                        <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Submitting...</>
+                      ) : (
+                        "I Have Paid"
+                      )}
                     </button>
                   </div>
-                  {paymentInfo?.payment_instructions && (
-                    <p><strong>3.</strong> {paymentInfo.payment_instructions}</p>
-                  )}
-                  <p><strong>4.</strong> After sending, you'll receive your product within 24 hours!</p>
-                  <p><strong>5.</strong> You can check your order status in your dashboard anytime.</p>
                 </div>
               </div>
             )}
@@ -89,7 +228,7 @@ export default function CheckoutSuccessPage() {
                 <Key className="h-4 w-4 text-slate-600" />
               </div>
               <div className="space-y-4 text-[14px] text-slate-700">
-                <p>1. We will review your order and verify your payment.</p>
+                <p>1. We will review your order and verify your payment manually.</p>
                 <p>2. Within 24 hours, we will send you an email with the product files, installation instructions, and any other relevant information.</p>
                 <p>3. Please make sure you check your email inbox (and spam folder, just in case) at the email address you used to sign up!</p>
                 <p>4. If you don't receive anything within 24 hours, please contact us via our contact page.</p>

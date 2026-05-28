@@ -66,7 +66,7 @@ export default function PricingPreview() {
   ];
 
   return (
-    <section className="relative py-24 sm:py-32 overflow-hidden">
+    <section id="choose-your-edge" className="relative py-24 sm:py-32 overflow-hidden">
       <div className="absolute inset-0 grid-overlay opacity-30" />
 
       <div className="mx-auto max-w-7xl px-5 relative z-10">
