@@ -112,6 +112,17 @@ app = FastAPI(title=f"{settings.APP_NAME} API", lifespan=lifespan)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+# CORS - MUST BE FIRST BEFORE ROUTERS
+allow_origins = [o.strip() for o in settings.CORS_ORIGINS.split(",")] if settings.CORS_ORIGINS != "*" else ["*"]
+logger.info(f"CORS origins configured: {allow_origins}")
+app.add_middleware(
+    CORSMiddleware,
+    allow_credentials=True,
+    allow_origins=allow_origins,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @app.get("/api/")
 async def root():
@@ -145,16 +156,4 @@ app.include_router(payments_router, prefix="/api")
 # Mount static files for payment proofs
 from fastapi.staticfiles import StaticFiles
 app.mount("/storage/payment_proofs", StaticFiles(directory="storage/payment_proofs"), name="payment_proofs")
-
-
-# CORS
-allow_origins = [o.strip() for o in settings.CORS_ORIGINS.split(",")] if settings.CORS_ORIGINS != "*" else ["*"]
-logger.info(f"CORS origins configured: {allow_origins}")
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=allow_origins,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
